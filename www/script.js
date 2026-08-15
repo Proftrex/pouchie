@@ -1,4 +1,38 @@
 
+
+
+const APPS_SCRIPT_URL =
+  "https://script.google.com/macros/s/AKfycbzbmKO_zgVRGpiqu6A1MRt7DVkNYxERycmj4HNBbreWpy2p8RjzxId0vGh2SGV9Ma56/exec";
+
+
+function callAppsScript(action, data = {}) {
+
+  return fetch(APPS_SCRIPT_URL, {
+
+    method: "POST",
+
+    headers: {
+      "Content-Type": "application/json"
+    },
+
+    body: JSON.stringify({
+      action: action,
+      data: data
+    })
+
+  })
+  .then(res => res.json());
+
+}
+
+
+// =========================
+// YOUR EXISTING CODE STARTS HERE
+// =========================
+
+
+>>>>>>> aa4b371 (Fix Capacitor web assets loading)
+
 const APPS_SCRIPT_URL =
   "https://script.google.com/macros/s/AKfycbzbmKO_zgVRGpiqu6A1MRt7DVkNYxERycmj4HNBbreWpy2p8RjzxId0vGh2SGV9Ma56/exec";
 
@@ -30,19 +64,19 @@ function callAppsScript(action, data = {}) {
 function detectDevice() {
 
   var isMobile =
-    window.screen.width <= 768 ||
-    window.innerWidth <= 768 ||
-    /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+    !!window.Capacitor ||
+    /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) ||
+    window.innerWidth <= 1100;
 
-  if (isMobile) {
-    document.body.classList.add("mobile-device");
-  } else {
-    document.body.classList.remove("mobile-device");
-  }
+  document.body.classList.toggle("mobile-device", isMobile);
 
 }
 
 window.addEventListener("load", function() {
+  detectDevice();
+});
+
+window.addEventListener("resize", function() {
   detectDevice();
 });
 
@@ -6170,6 +6204,7 @@ function confirmClaimAction(){
 }
 
 
+
 function loginUser(){
 
   const email =
@@ -6204,6 +6239,7 @@ function loginUser(){
     if(result.success){
 
 
+<<<<<<< HEAD
       window.loggedInUser = {
         email: email
       };
@@ -6224,6 +6260,49 @@ function loginUser(){
 
     }
 
+=======
+      /*
+       * SAVE LOGGED-IN USER
+       */
+
+      window.loggedInUser = {
+
+        email: email
+
+      };
+
+
+      /*
+       * HIDE LOGIN
+       */
+
+      document
+        .getElementById("loginScreen")
+        .style.display =
+        "none";
+
+
+      /*
+       * SHOW APP
+       */
+
+      document
+        .getElementById("mainApp")
+        .style.display =
+        "flex";
+
+
+      /*
+       * LOAD DASHBOARD
+       */
+
+      loadDashboard();
+
+
+    }
+
+
+>>>>>>> aa4b371 (Fix Capacitor web assets loading)
     else{
 
 
@@ -6243,8 +6322,16 @@ function loginUser(){
 
 
     console.error(
+<<<<<<< HEAD
       "Login Error:",
       error
+=======
+
+      "Login Error:",
+
+      error
+
+>>>>>>> aa4b371 (Fix Capacitor web assets loading)
     );
 
 
@@ -6258,7 +6345,6 @@ function loginUser(){
 
 
 }
-
 
 /* =========================
    PERSONAL INCOME MODAL
@@ -9124,4 +9210,7 @@ function editCreditCard(id){
 
 
 }
+<<<<<<< HEAD
 
+=======
+>>>>>>> aa4b371 (Fix Capacitor web assets loading)
