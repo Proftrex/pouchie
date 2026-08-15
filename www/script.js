@@ -1,5 +1,27 @@
-<script>
 
+const APPS_SCRIPT_URL =
+  "https://script.google.com/macros/s/AKfycbzbmKO_zgVRGpiqu6A1MRt7DVkNYxERycmj4HNBbreWpy2p8RjzxId0vGh2SGV9Ma56/exec";
+
+
+function callAppsScript(action, data = {}) {
+
+  return fetch(APPS_SCRIPT_URL, {
+
+    method: "POST",
+
+    headers: {
+      "Content-Type": "application/json"
+    },
+
+    body: JSON.stringify({
+      action: action,
+      data: data
+    })
+
+  })
+  .then(res => res.json());
+
+}
 
 /* =========================
    DEVICE TYPE DETECTION
@@ -9098,5 +9120,3 @@ function editCreditCard(id){
 
 }
 
-
-</script>
