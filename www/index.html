@@ -1,0 +1,3326 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+  <base target="_top">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Pouch</title>
+
+  <?!= include("styles"); ?>
+
+</head>
+
+
+<body>
+
+
+<!-- =========================================================
+     LOGIN SCREEN
+========================================================= -->
+
+<div id="loginScreen" class="login-screen">
+
+  <div class="login-box">
+
+    
+
+    <h2>Pouchie</h2>
+
+    <p>
+      Don't put all your pennies in one pouch.
+    </p>
+
+    <input
+      id="loginEmail"
+      type="email"
+      placeholder="Email address"
+    >
+
+    <button onclick="loginUser()">
+      Enter Pouchie
+    </button>
+
+    <p id="loginMessage"></p>
+
+  </div>
+
+</div>
+
+
+
+<!-- =========================================================
+     MAIN APP
+========================================================= -->
+
+<div class="app" id="mainApp" style="display:none;">
+
+
+
+<!-- =========================================================
+     SIDEBAR
+========================================================= -->
+
+<aside class="sidebar">
+
+
+  <div class="brand">
+
+    
+
+    <h2>Pouch</h2>
+
+    <p class="brand-subtitle">
+      Don't put all your pennies in one pouch.
+    </p>
+
+  </div>
+
+
+
+  <nav class="sidebar-menu">
+
+  <!-- HOME / DASHBOARD -->
+  <button
+    type="button"
+    data-page="dashboard"
+    onclick="showPage('dashboard')"
+  >
+
+    <img
+      src="http://i.imgur.com/mc7yaH2.png"
+      alt=""
+    >
+
+    <span>My Pouch</span>
+
+  </button>
+
+
+  <!-- MY POUCH / ASSETS -->
+  <button
+    type="button"
+    data-page="assets"
+    onclick="showPage('assets')"
+  >
+
+    <img
+      src="https://i.imgur.com/9I1klIN.png"
+      alt=""
+    >
+
+    <span>My Treasures</span>
+
+  </button>
+
+
+  <!-- MONEY I OWE / LIABILITIES -->
+  <button
+    type="button"
+    data-page="liabilities"
+    onclick="showPage('liabilities')"
+  >
+
+    <img
+      src="https://i.imgur.com/HjoUVTU.png"
+      alt=""
+    >
+
+    <span>My Open Tabs</span>
+
+  </button>
+
+
+  <!-- INCOME -->
+  <button
+    type="button"
+    data-page="income"
+    onclick="showPage('income')"
+  >
+
+    <img
+      src="https://i.imgur.com/gCmxNjR.png"
+      alt=""
+    >
+
+    <span>My Hardwork</span>
+
+  </button>
+
+</nav>
+
+
+
+  <footer class="pdax-sidebar-footer">
+
+    <div class="footer-icons-only">
+
+      <a
+        href="https://pdax.ph"
+        target="_blank"
+        rel="noopener"
+      >
+
+        <img
+          src="https://i.imgur.com/ZkuCQ9d.png"
+          alt="PDAX Website"
+        >
+
+      </a>
+
+
+      <a
+        href="https://www.facebook.com/groups/PDAXCommunity"
+        target="_blank"
+        rel="noopener"
+      >
+
+        <img
+          src="https://i.imgur.com/rZ8CLrt.png"
+          alt="Facebook Community"
+        >
+
+      </a>
+
+
+      <a
+        href="https://t.me/PDAX_official"
+        target="_blank"
+        rel="noopener"
+      >
+
+        <img
+          src="https://i.imgur.com/FQeRzLX.png"
+          alt="Telegram Community"
+        >
+
+      </a>
+
+    </div>
+
+
+    <p class="footer-note">
+      © 2026 Pouchie. All rights reserved.
+    </p>
+
+  </footer>
+
+
+</aside>
+
+
+
+<!-- =========================================================
+     MAIN CONTENT
+========================================================= -->
+
+<main class="content">
+
+
+
+<!-- =========================================================
+     ASSETS PAGE
+========================================================= -->
+
+<section
+  id="assetsPage"
+  style="display:none;"
+>
+
+  <div class="page-header">
+
+<button 
+  class="back-btn"
+  onclick="goBackDashboard()"
+>
+  ← Back
+</button>
+
+    <h1>
+      My Treasures
+    </h1>
+
+  </div>
+
+
+  <h2>
+    What's in your pouch?
+  </h2>
+
+
+  <div class="summary-grid">
+
+
+    <div
+      class="summary-card"
+      onclick="showPage('savings')"
+      style="cursor:pointer;"
+    >
+
+      <div class="pouch-category-icon">
+
+  <img 
+    src="https://i.imgur.com/A6yGK5t.png"
+    alt="Savings"
+  >
+
+</div>
+
+      <h3>
+        Savings
+      </h3>
+
+      <p>
+        Cash & Digital Cash
+      </p>
+
+    </div>
+
+
+
+    <div
+      class="summary-card"
+      onclick="showPage('cryptocurrencies')"
+      style="cursor:pointer;"
+    >
+
+      <div class="pouch-category-icon">
+
+  <img 
+    src="https://i.imgur.com/ee3Z5F1.png"
+    alt="Cryptocurrency"
+  >
+
+</div>
+
+      <h3>
+        Crypto
+      </h3>
+
+      <p>
+        Cryptos
+      </p>
+
+    </div>
+
+
+
+    <div
+      class="summary-card"
+      onclick="showPage('bonds')"
+      style="cursor:pointer;"
+    >
+
+      <div class="pouch-category-icon">
+
+  <img 
+    src="https://i.imgur.com/DAVM0bA.png"
+    alt="Government Bonds"
+  >
+
+</div>
+
+      <h3>
+        Government Bonds
+      </h3>
+
+      <p>
+        T-Bills & RTBs
+      </p>
+
+    </div>
+
+
+
+    <div
+      class="summary-card"
+      onclick="showPage('commodities')"
+      style="cursor:pointer;"
+    >
+
+      <div class="pouch-category-icon">
+
+  <img 
+    src="https://i.imgur.com/bILFB9x.png"
+    alt="Commodities"
+  >
+
+</div>
+
+      <h3>
+        Gold & Silver
+      </h3>
+
+      <p>
+        Precious Metals
+      </p>
+
+    </div>
+
+
+
+    <div
+      class="summary-card"
+      onclick="showPage('stocks')"
+      style="cursor:pointer;"
+    >
+
+      <div class="pouch-category-icon">
+
+  <img 
+    src="https://i.imgur.com/AjpSCHa.png"
+    alt="Stocks"
+  >
+
+</div>
+
+      <h3>
+        Stocks
+      </h3>
+
+      <p>
+        Stock Holdings
+      </p>
+
+    </div>
+
+
+  </div>
+
+</section>
+
+
+
+<!-- =========================================================
+     LIABILITIES PAGE
+========================================================= -->
+
+<section
+  id="liabilitiesPage"
+  style="display:none;"
+>
+
+  <div class="page-header">
+
+<button 
+  class="back-btn"
+  onclick="goBackDashboard()"
+>
+  ← Back
+</button>
+
+    <h1>
+      My Open Tabs
+    </h1>
+
+  </div>
+
+
+  <h2>
+    What's in your open tabs?
+  </h2>
+
+
+  <div class="summary-grid">
+
+
+    <div
+      class="summary-card"
+      onclick="showPage('creditCards')"
+      style="cursor:pointer;"
+    >
+
+      <div class="pouch-category-icon">
+
+  <img 
+    src="https://i.imgur.com/ytHqRnd.png"
+    alt="Credit Cards"
+  >
+
+</div>
+
+      <h3>
+        Credit Cards
+      </h3>
+
+      <p>
+        Credit Card Balances
+      </p>
+
+    </div>
+
+
+
+    <div
+      class="summary-card"
+      onclick="showPage('loans')"
+      style="cursor:pointer;"
+    >
+
+      <div class="pouch-category-icon">
+
+  <img 
+    src="https://i.imgur.com/8MDDlqN.png"
+    alt="Loans"
+  >
+
+</div>
+
+      <h3>
+        Loans
+      </h3>
+
+      <p>
+        Personal and Other Loans
+      </p>
+
+    </div>
+
+
+  </div>
+
+</section>
+
+
+
+<!-- =========================================================
+     CREDIT CARDS
+========================================================= -->
+
+<section
+  id="creditCardsPage"
+  style="display:none;"
+>
+
+  <div class="page-header">
+
+<button 
+  class="back-btn"
+  onclick="goBackDashboard()"
+>
+  ← Back
+</button>
+
+    <h1>
+      Credit Cards
+    </h1>
+
+    <div class="page-actions">
+
+      <button
+        class="action-btn"
+        onclick="openCreditCardModal()"
+      >
+        + Add Credit Card
+      </button>
+
+    </div>
+
+  </div>
+
+
+  <h2>
+    Credit Card Summary
+  </h2>
+
+
+  <div class="summary-grid">
+
+
+    <div class="summary-card">
+
+      <h3>
+        Total Balance
+      </h3>
+
+      <p id="creditCardTotalBalance">
+        ₱0.00
+      </p>
+
+    </div>
+
+
+    <div class="summary-card">
+
+      <h3>
+        Total Credit Limit
+      </h3>
+
+      <p id="creditCardTotalLimit">
+        ₱0.00
+      </p>
+
+    </div>
+
+
+    <div class="summary-card">
+
+      <h3>
+        Available Credit
+      </h3>
+
+      <p id="creditCardAvailableCredit">
+        ₱0.00
+      </p>
+
+    </div>
+
+
+    <div class="summary-card">
+
+      <h3>
+        Credit Utilization
+      </h3>
+
+      <p id="creditCardUtilization">
+        0%
+      </p>
+
+    </div>
+
+
+  </div>
+
+
+  <h2>
+    My Credit Cards
+  </h2>
+
+
+  <div
+    id="creditCardCards"
+    class="asset-grid"
+  ></div>
+
+
+</section>
+
+
+
+<!-- =========================================================
+     LOANS
+========================================================= -->
+
+<section
+  id="loansPage"
+  style="display:none;"
+>
+
+  <div class="page-header">
+
+<button 
+  class="back-btn"
+  onclick="goBackDashboard()"
+>
+  ← Back
+</button>
+
+    <h1>
+      Loans
+    </h1>
+
+    <div class="page-actions">
+
+      <button
+        class="action-btn"
+        onclick="openLoanModal()"
+      >
+        + Add Loan
+      </button>
+
+    </div>
+
+  </div>
+
+
+  <h2>
+    Loan Summary
+  </h2>
+
+
+  <div class="summary-grid">
+
+
+    <div class="summary-card">
+
+      <h3>
+        Total Outstanding
+      </h3>
+
+      <p id="loanTotalOutstanding">
+        ₱0.00
+      </p>
+
+    </div>
+
+
+    <div class="summary-card">
+
+      <h3>
+        Total Original Loans
+      </h3>
+
+      <p id="loanTotalOriginal">
+        ₱0.00
+      </p>
+
+    </div>
+
+
+    <div class="summary-card">
+
+      <h3>
+        Total Paid
+      </h3>
+
+      <p id="loanTotalPaid">
+        ₱0.00
+      </p>
+
+    </div>
+
+
+    <div class="summary-card">
+
+      <h3>
+        Active Loans
+      </h3>
+
+      <p id="loanActiveCount">
+        0
+      </p>
+
+    </div>
+
+
+  </div>
+
+
+  <h2>
+    My Loans
+  </h2>
+
+
+  <div
+    id="loanCards"
+    class="asset-grid"
+  ></div>
+
+
+</section>
+
+
+
+<!-- =========================================================
+     INCOME PAGE
+========================================================= -->
+
+<section
+  id="incomePage"
+  style="display:none;"
+>
+
+  <div class="page-header">
+
+
+<button 
+  class="back-btn"
+  onclick="goBackDashboard()"
+>
+  ← Back
+</button>
+
+
+    <h1>
+      My Hardword
+    </h1>
+
+  </div>
+
+
+  <h2>
+    How's your hardwork so far?
+  </h2>
+
+
+  <div class="summary-grid">
+
+
+    <div
+      class="summary-card"
+      onclick="showPage('personalIncome')"
+      style="cursor:pointer;"
+    >
+
+      <div class="pouch-category-icon">
+
+  <img 
+    src="https://i.imgur.com/0bZUACm.png"
+    alt="Personal Income"
+  >
+
+</div>
+
+      <h3>
+        Personal Income
+      </h3>
+
+      <p>
+        Personal Income Sources
+      </p>
+
+    </div>
+
+
+
+    <div
+      class="summary-card"
+      onclick="showPage('businessIncome')"
+      style="cursor:pointer;"
+    >
+
+      <div class="pouch-category-icon">
+
+  <img 
+    src="https://i.imgur.com/Xc4YitN.png"
+    alt="Business Income"
+  >
+
+</div>
+
+      <h3>
+        Business Income
+      </h3>
+
+      <p>
+        Business Income Sources
+      </p>
+
+    </div>
+
+
+  </div>
+
+</section>
+
+
+
+<!-- =========================================================
+     PERSONAL INCOME
+========================================================= -->
+
+<section
+  id="personalIncomePage"
+  style="display:none;"
+>
+
+  <div class="page-header">
+
+<button 
+  class="back-btn"
+  onclick="goBackDashboard()"
+>
+  ← Back
+</button>
+
+
+    <h1>
+      Personal Income
+    </h1>
+
+    <div class="page-actions">
+
+      <button
+        class="action-btn"
+        onclick="openPersonalIncomeModal()"
+      >
+        + Add Personal Income
+      </button>
+
+    </div>
+
+  </div>
+
+
+  <h2>
+    Personal Income Summary
+  </h2>
+
+
+  <div class="summary-grid">
+
+
+    <div class="summary-card">
+
+      <h3>
+        This Month
+      </h3>
+
+      <p id="personalIncomeMonthly">
+        ₱0.00
+      </p>
+
+    </div>
+
+
+    <div class="summary-card">
+
+      <h3>
+        This Year
+      </h3>
+
+      <p id="personalIncomeYearly">
+        ₱0.00
+      </p>
+
+    </div>
+
+
+    <div class="summary-card">
+
+      <h3>
+        Average Monthly Income
+      </h3>
+
+      <p id="personalIncomeAverage">
+        ₱0.00
+      </p>
+
+    </div>
+
+
+  </div>
+
+
+  <h2>
+    Income Sources
+  </h2>
+
+
+  <div
+    id="personalIncomeCards"
+    class="asset-grid"
+  ></div>
+
+
+  <h2>
+    Income History
+  </h2>
+
+
+  <table id="personalIncomeTable">
+
+    <thead>
+
+      <tr>
+
+        <th>Date</th>
+
+        <th>Source</th>
+
+        <th>Amount</th>
+
+        <th>Action</th>
+
+      </tr>
+
+    </thead>
+
+
+    <tbody id="personalIncomeTransactionTable"></tbody>
+
+  </table>
+
+
+</section>
+
+
+
+<!-- =========================================================
+     BUSINESS INCOME
+========================================================= -->
+
+<section
+  id="businessIncomePage"
+  style="display:none;"
+>
+
+  <div class="page-header">
+
+<button 
+  class="back-btn"
+  onclick="goBackDashboard()"
+>
+  ← Back
+</button>
+
+
+    <h1>
+      Business Income
+    </h1>
+
+    <div class="page-actions">
+
+      <button
+        class="action-btn"
+        onclick="openBusinessIncomeModal()"
+      >
+        + Add Business Income
+      </button>
+
+    </div>
+
+  </div>
+
+
+  <h2>
+    Business Income Summary
+  </h2>
+
+
+  <div class="summary-grid">
+
+
+    <div class="summary-card">
+
+      <h3>
+        This Month
+      </h3>
+
+      <p id="businessIncomeMonthly">
+        ₱0.00
+      </p>
+
+    </div>
+
+
+    <div class="summary-card">
+
+      <h3>
+        This Year
+      </h3>
+
+      <p id="businessIncomeYearly">
+        ₱0.00
+      </p>
+
+    </div>
+
+
+    <div class="summary-card">
+
+      <h3>
+        Average Monthly Income
+      </h3>
+
+      <p id="businessIncomeAverage">
+        ₱0.00
+      </p>
+
+    </div>
+
+
+  </div>
+
+
+  <h2>
+    Businesses
+  </h2>
+
+
+  <div
+    id="businessIncomeCards"
+    class="asset-grid"
+  ></div>
+
+
+  <h2>
+    Income History
+  </h2>
+
+
+  <table id="businessIncomeTable">
+
+    <thead>
+
+      <tr>
+
+        <th>Date</th>
+
+        <th>Business</th>
+
+        <th>Description</th>
+
+        <th>Amount</th>
+
+        <th>Action</th>
+
+      </tr>
+
+    </thead>
+
+
+    <tbody id="businessIncomeTransactionTable"></tbody>
+
+  </table>
+
+
+</section>
+
+
+
+<!-- =========================================================
+     DASHBOARD
+========================================================= -->
+
+<section id="dashboardPage">
+
+
+  <div class="page-header">
+
+
+    <div>
+
+      <h1>
+        Welcome back to your Pouch!
+      </h1>
+
+      <p class="dashboard-welcome">
+        Here's what's inside your pouch today.
+      </p>
+
+    </div>
+
+
+
+  </div>
+
+
+
+  <!-- =====================================================
+       NET WORTH
+  ====================================================== -->
+
+  <div class="networth-card">
+
+    <h2>
+      Total Wealth
+    </h2>
+
+    <p id="netWorth">
+      ₱0.00
+    </p>
+
+    <small class="networth-caption">
+      Everything you currently have, minus what you owe.
+    </small>
+
+  </div>
+
+
+
+  <!-- =====================================================
+       ASSET ALLOCATION
+  ====================================================== -->
+
+  <h2>
+    What's in your pouch
+  </h2>
+
+
+  <div class="summary-grid">
+
+
+    <div class="summary-card">
+
+      <h3>
+        Savings
+      </h3>
+
+      <p id="dashboardSavings">
+        ₱0.00
+      </p>
+
+    </div>
+
+
+    <div class="summary-card">
+
+      <h3>
+        Crypto
+      </h3>
+
+      <p id="dashboardCryptocurrencies">
+        ₱0.00
+      </p>
+
+    </div>
+
+
+    <div class="summary-card">
+
+      <h3>
+        Government Bonds
+      </h3>
+
+      <p id="dashboardBonds">
+        ₱0.00
+      </p>
+
+    </div>
+
+
+    <div class="summary-card">
+
+      <h3>
+        Gold & Silver
+      </h3>
+
+      <p id="dashboardCommodities">
+        ₱0.00
+      </p>
+
+    </div>
+
+
+    <div class="summary-card">
+
+      <h3>
+        Stocks
+      </h3>
+
+      <p id="dashboardStocks">
+        ₱0.00
+      </p>
+
+    </div>
+
+
+  </div>
+
+
+
+
+
+  <!-- =====================================================
+       INVESTMENT OVERVIEW
+  ====================================================== -->
+
+  <h2>
+    Your investments
+  </h2>
+
+
+  <div class="summary-grid">
+
+
+    <div class="summary-card">
+
+      <h3>
+        Total Invested
+      </h3>
+
+      <p id="dashboardInvested">
+        ₱0.00
+      </p>
+
+    </div>
+
+
+    <div class="summary-card">
+
+      <h3>
+        Current Value
+      </h3>
+
+      <p id="dashboardCurrentValue">
+        ₱0.00
+      </p>
+
+    </div>
+
+
+    <div class="summary-card">
+
+      <h3>
+        Profit / Loss
+      </h3>
+
+      <p id="dashboardPnL">
+        ₱0.00
+      </p>
+
+    </div>
+
+
+    <div class="summary-card">
+
+      <h3>
+        Return
+      </h3>
+
+      <p id="dashboardPnLPercentage">
+        0.00%
+      </p>
+
+    </div>
+
+
+  </div>
+
+
+  <!-- =====================================================
+       INCOME OVERVIEW
+  ====================================================== -->
+
+  <h2>
+    Money coming in
+  </h2>
+
+
+  <div class="summary-grid">
+
+
+    <div class="summary-card">
+
+      <h3>
+        Personal Income
+      </h3>
+
+      <p id="dashboardPersonalIncome">
+        ₱0.00
+      </p>
+
+      <small>
+        This Month
+      </small>
+
+    </div>
+
+
+    <div class="summary-card">
+
+      <h3>
+        Business Income
+      </h3>
+
+      <p id="dashboardBusinessIncome">
+        ₱0.00
+      </p>
+
+      <small>
+        This Month
+      </small>
+
+    </div>
+
+
+    <div class="summary-card">
+
+      <h3>
+        Total Income
+      </h3>
+
+      <p id="dashboardTotalIncome">
+        ₱0.00
+      </p>
+
+      <small>
+        This Month
+      </small>
+
+    </div>
+
+
+    <div class="summary-card">
+
+      <h3>
+        Yearly Income
+      </h3>
+
+      <p id="dashboardYearlyIncome">
+        ₱0.00
+      </p>
+
+      <small>
+        This Year
+      </small>
+
+    </div>
+
+
+  </div>
+
+
+  <!-- =====================================================
+       KEY INSIGHTS
+  ====================================================== -->
+
+  <h2>
+    Little money insights
+  </h2>
+
+
+  <div class="summary-grid">
+
+
+    <div class="summary-card">
+
+      <h3>
+        Largest Asset
+      </h3>
+
+      <p id="dashboardLargestAsset">
+        No assets yet
+      </p>
+
+    </div>
+
+
+    <div class="summary-card">
+
+      <h3>
+        Best Performing Asset
+      </h3>
+
+      <p id="dashboardBestAsset">
+        No gains yet
+      </p>
+
+    </div>
+
+
+    <div class="summary-card">
+
+      <h3>
+        Total Assets
+      </h3>
+
+      <p id="dashboardAssets">
+        0
+      </p>
+
+    </div>
+
+
+  </div>
+
+
+</section>
+
+
+
+<!-- =========================================================
+     SAVINGS
+========================================================= -->
+
+<section
+  id="savingsPage"
+  style="display:none;"
+>
+
+
+  <div class="page-header">
+
+<button 
+  class="back-btn"
+  onclick="goBackDashboard()"
+>
+  ← Back
+</button>
+
+
+    <h1>
+      Savings
+    </h1>
+
+    <div class="page-actions">
+
+      <button
+        class="action-btn"
+        onclick="openSavingsModal()"
+      >
+        + Add Savings
+      </button>
+
+
+      <button
+        class="action-btn"
+        onclick="openWithdrawalModal()"
+      >
+        Withdraw
+      </button>
+
+
+      <a
+        href="https://pdax.ph"
+        target="_blank"
+      >
+
+        <button class="pdax-action-btn">
+          Start your PDAX Journey
+        </button>
+
+      </a>
+
+    </div>
+
+  </div>
+
+
+
+  <h2>
+    Your savings
+  </h2>
+
+
+  <div
+    id="savingsCards"
+    class="asset-grid"
+  ></div>
+
+
+
+  <h2>
+    Money trail
+  </h2>
+
+
+  <table id="savingsTransactionHistoryTable">
+
+    <thead>
+
+      <tr>
+
+        <th>Date</th>
+
+        <th>Transaction</th>
+
+        <th>Mode</th>
+
+        <th>Bank</th>
+
+        <th>Amount</th>
+
+        <th>Action</th>
+
+      </tr>
+
+    </thead>
+
+
+    <tbody id="savingsTransactionTable"></tbody>
+
+  </table>
+
+
+</section>
+
+
+
+<!-- =========================================================
+     CRYPTOCURRENCIES
+========================================================= -->
+
+<section
+  id="cryptocurrenciesPage"
+  style="display:none;"
+>
+
+
+  <div class="page-header">
+
+<button 
+  class="back-btn"
+  onclick="goBackDashboard()"
+>
+  ← Back
+</button>
+
+
+    <h1>
+      Crypto
+    </h1>
+
+    <div class="page-actions">
+
+      <button
+        class="action-btn"
+        onclick="openCryptoModal()"
+      >
+        + Add Crypto
+      </button>
+
+
+      <a
+        href="https://pdax.ph"
+        target="_blank"
+      >
+
+        <button class="pdax-action-btn">
+          Trade Crypto
+        </button>
+
+      </a>
+
+    </div>
+
+  </div>
+
+
+
+  <h2>
+    Portfolio Summary
+  </h2>
+
+
+  <div class="summary-grid">
+
+
+    <div class="summary-card">
+
+      <h3>
+        Total Invested
+      </h3>
+
+      <p id="cryptocurrenciesTotalInvested">
+        ₱0
+      </p>
+
+    </div>
+
+
+    <div class="summary-card">
+
+      <h3>
+        Current Value
+      </h3>
+
+      <p id="cryptocurrenciesCurrentValue">
+        ₱0
+      </p>
+
+    </div>
+
+
+    <div class="summary-card">
+
+      <h3>
+        Total P&L
+      </h3>
+
+      <p id="cryptocurrenciesTotalPnl">
+        ₱0
+      </p>
+
+    </div>
+
+
+    <div class="summary-card">
+
+      <h3>
+        Assets
+      </h3>
+
+      <p id="cryptocurrenciesTotalAssets">
+        0
+      </p>
+
+    </div>
+
+
+  </div>
+
+
+  <h2>
+    Current Holdings
+  </h2>
+
+
+  <div
+    id="cryptoCards"
+    class="asset-grid"
+  ></div>
+
+
+  <h2>
+    Money trail
+  </h2>
+
+
+  <table id="transactionsTable">
+
+    <thead>
+
+      <tr>
+
+        <th>Date</th>
+
+        <th>Transaction</th>
+
+        <th>Asset</th>
+
+        <th>Price</th>
+
+        <th>Amount</th>
+
+        <th>Action</th>
+
+      </tr>
+
+    </thead>
+
+
+    <tbody id="cryptoTransactionTable"></tbody>
+
+  </table>
+
+
+</section>
+
+
+
+<!-- =========================================================
+     BONDS
+========================================================= -->
+
+<section
+  id="bondsPage"
+  style="display:none;"
+>
+
+
+  <div class="page-header">
+
+<button 
+  class="back-btn"
+  onclick="goBackDashboard()"
+>
+  ← Back
+</button>
+
+
+    <h1>
+      Government Bonds
+    </h1>
+
+    <div class="page-actions">
+
+      <button
+        class="action-btn"
+        onclick="openBondModal()"
+      >
+        + Add Bond
+      </button>
+
+
+      <a
+        href="https://pdax.ph"
+        target="_blank"
+      >
+
+        <button class="pdax-action-btn">
+          Explore Bonds
+        </button>
+
+      </a>
+
+    </div>
+
+  </div>
+
+
+
+  <h2>
+    Bond Summary
+  </h2>
+
+
+  <div class="summary-grid">
+
+
+    <div class="summary-card">
+
+      <h3>
+        Total Bond Investment
+      </h3>
+
+      <p id="bondTotalInvestment">
+        ₱0.00
+      </p>
+
+    </div>
+
+
+    <div class="summary-card">
+
+      <h3>
+        Interest Earned
+      </h3>
+
+      <p id="bondInterestEarned">
+        ₱0.00
+      </p>
+
+    </div>
+
+
+    <div class="summary-card">
+
+      <h3>
+        Maturity Value
+      </h3>
+
+      <p id="bondMaturityValue">
+        ₱0.00
+      </p>
+
+    </div>
+
+
+    <div class="summary-card">
+
+      <h3>
+        Active Bonds
+      </h3>
+
+      <p id="bondActiveCount">
+        0
+      </p>
+
+    </div>
+
+
+  </div>
+
+
+
+  <h2>
+    Bond Holdings
+  </h2>
+
+
+  <div
+    id="bondCards"
+    class="asset-grid"
+  ></div>
+
+
+  <h2>
+    Money trail
+  </h2>
+
+
+  <table id="bondTransactionsTable">
+
+    <thead>
+
+      <tr>
+
+        <th>Date</th>
+
+        <th>Transaction</th>
+
+        <th>Bond</th>
+
+        <th>Amount</th>
+
+        <th>Fees</th>
+
+        <th>APY</th>
+
+        <th>Action</th>
+
+      </tr>
+
+    </thead>
+
+
+    <tbody id="bondTransactionTable"></tbody>
+
+  </table>
+
+
+</section>
+
+
+
+<!-- =========================================================
+     COMMODITIES
+========================================================= -->
+
+<section
+  id="commoditiesPage"
+  style="display:none;"
+>
+
+
+  <div class="page-header">
+
+<button 
+  class="back-btn"
+  onclick="goBackDashboard()"
+>
+  ← Back
+</button>
+
+
+    <h1>
+      Gold & Silver
+    </h1>
+
+    <div class="page-actions">
+
+      <button
+        class="action-btn"
+        onclick="openCommodityModal()"
+      >
+        + Add Metal
+      </button>
+
+
+      <a
+        href="https://pdax.ph"
+        target="_blank"
+      >
+
+        <button class="pdax-action-btn">
+          Trade PDAX Gold
+        </button>
+
+      </a>
+
+    </div>
+
+  </div>
+
+
+
+  <h2>
+    Portfolio Summary
+  </h2>
+
+
+  <div class="summary-grid">
+
+
+    <div class="summary-card">
+
+      <h3>
+        Total Invested
+      </h3>
+
+      <p id="commodityTotalInvested">
+        ₱0.00
+      </p>
+
+    </div>
+
+
+    <div class="summary-card">
+
+      <h3>
+        Current Value
+      </h3>
+
+      <p id="commodityCurrentValue">
+        ₱0.00
+      </p>
+
+    </div>
+
+
+    <div class="summary-card">
+
+      <h3>
+        Total P&L
+      </h3>
+
+      <p id="commodityTotalPnl">
+        ₱0.00
+      </p>
+
+    </div>
+
+
+    <div class="summary-card">
+
+      <h3>
+        Assets
+      </h3>
+
+      <p id="commodityTotalAssets">
+        0
+      </p>
+
+    </div>
+
+
+  </div>
+
+
+
+  <h2>
+    Current Holdings
+  </h2>
+
+
+  <div
+    id="commodityCards"
+    class="asset-grid"
+  ></div>
+
+
+  <h2>
+    Money trail
+  </h2>
+
+
+  <table id="commodityTransactionsTable">
+
+    <thead>
+
+      <tr>
+
+        <th>Date</th>
+
+        <th>Transaction</th>
+
+        <th>Asset</th>
+
+        <th>Quantity</th>
+
+        <th>Price</th>
+
+        <th>Amount</th>
+
+        <th>Action</th>
+
+      </tr>
+
+    </thead>
+
+
+    <tbody id="commodityTransactionTable"></tbody>
+
+  </table>
+
+
+</section>
+
+
+
+<!-- =========================================================
+     STOCKS
+========================================================= -->
+
+<section
+  id="stocksPage"
+  style="display:none;"
+>
+
+
+  <div class="page-header">
+
+<button 
+  class="back-btn"
+  onclick="goBackDashboard()"
+>
+  ← Back
+</button>
+
+
+    <h1>
+      Stocks
+    </h1>
+
+    <div class="page-actions">
+
+      <button
+        class="action-btn"
+        onclick="openStockModal()"
+      >
+        + Add Stock
+      </button>
+
+
+      <a
+        href="https://pdax.ph"
+        target="_blank"
+      >
+
+        <button class="pdax-action-btn">
+          Trade Stocks
+        </button>
+
+      </a>
+
+    </div>
+
+  </div>
+
+
+
+  <h2>
+    Portfolio Summary
+  </h2>
+
+
+  <div class="summary-grid">
+
+
+    <div class="summary-card">
+
+      <h3>
+        Total Invested
+      </h3>
+
+      <p id="stockTotalInvested">
+        ₱0.00
+      </p>
+
+    </div>
+
+
+    <div class="summary-card">
+
+      <h3>
+        Current Value
+      </h3>
+
+      <p id="stockCurrentValue">
+        ₱0.00
+      </p>
+
+    </div>
+
+
+    <div class="summary-card">
+
+      <h3>
+        Total P&L
+      </h3>
+
+      <p id="stockTotalPnl">
+        ₱0.00
+      </p>
+
+    </div>
+
+
+    <div class="summary-card">
+
+      <h3>
+        Assets
+      </h3>
+
+      <p id="stockTotalAssets">
+        0
+      </p>
+
+    </div>
+
+
+  </div>
+
+
+
+  <h2>
+    Current Holdings
+  </h2>
+
+
+  <div
+    id="stockCards"
+    class="asset-grid"
+  ></div>
+
+
+  <h2>
+    Money trail
+  </h2>
+
+
+  <table id="stockTransactionsTable">
+
+    <thead>
+
+      <tr>
+
+        <th>Date</th>
+
+        <th>Transaction</th>
+
+        <th>Asset</th>
+
+        <th>Quantity</th>
+
+        <th>Price</th>
+
+        <th>Amount</th>
+
+        <th>Action</th>
+
+      </tr>
+
+    </thead>
+
+
+    <tbody id="stockTransactionTable"></tbody>
+
+  </table>
+
+
+</section>
+
+
+</main>
+
+</div>
+
+
+
+<!-- =========================================================
+     SAVINGS MODAL
+========================================================= -->
+
+<div
+  id="savingsModal"
+  class="modal"
+>
+
+
+  <div class="modal-box">
+
+
+    <h2>
+      Add Savings
+    </h2>
+
+
+    <label>
+      Date
+    </label>
+
+    <input
+      type="date"
+      id="savingsDate"
+    >
+
+
+    <label>
+      Mode
+    </label>
+
+    <select
+      id="savingsMode"
+      onchange="toggleSavingsBank()"
+    >
+
+      <option value="">
+        Select Mode
+      </option>
+
+      <option value="Cash">
+        Cash
+      </option>
+
+      <option value="Digital Cash">
+        Digital Cash
+      </option>
+
+    </select>
+
+
+    <div
+      id="bankField"
+      style="display:none;"
+    >
+
+      <label>
+        Bank Name
+      </label>
+
+      <select id="savingsBank">
+
+        <option value="">
+          Select Bank / Wallet
+        </option>
+
+      </select>
+
+    </div>
+
+
+    <label>
+      Amount
+    </label>
+
+    <input
+      type="number"
+      id="savingsAmount"
+      placeholder="0"
+    >
+
+
+    <div class="modal-actions">
+
+      <button onclick="closeSavingsModal()">
+        Cancel
+      </button>
+
+      <button onclick="submitSavings()">
+        Save
+      </button>
+
+    </div>
+
+
+  </div>
+
+</div>
+
+
+
+<!-- =========================================================
+     WITHDRAWAL MODAL
+========================================================= -->
+
+<div
+  id="withdrawalModal"
+  class="modal"
+>
+
+
+  <div class="modal-box">
+
+
+    <h2>
+      Withdraw Savings
+    </h2>
+
+
+    <label>
+      Date
+    </label>
+
+    <input
+      type="date"
+      id="withdrawalDate"
+    >
+
+
+    <label>
+      Mode
+    </label>
+
+    <select
+      id="withdrawalMode"
+      onchange="toggleWithdrawalBank()"
+    >
+
+      <option value="">
+        Select Mode
+      </option>
+
+      <option value="Cash">
+        Cash
+      </option>
+
+      <option value="Digital Cash">
+        Digital Cash
+      </option>
+
+    </select>
+
+
+    <div
+      id="withdrawalBankField"
+      style="display:none;"
+    >
+
+      <label>
+        Bank Name
+      </label>
+
+      <select id="withdrawalBank">
+
+        <option value="">
+          Select Bank
+        </option>
+
+      </select>
+
+    </div>
+
+
+    <label>
+      Amount
+    </label>
+
+    <input
+      type="number"
+      id="withdrawalAmount"
+      placeholder="0"
+    >
+
+
+    <div class="modal-actions">
+
+      <button onclick="closeWithdrawalModal()">
+        Cancel
+      </button>
+
+      <button onclick="submitWithdrawal()">
+        Save
+      </button>
+
+    </div>
+
+
+  </div>
+
+</div>
+
+
+
+<!-- =========================================================
+     CRYPTO TRANSACTION MODAL
+========================================================= -->
+
+<div
+  id="cryptoModal"
+  class="modal"
+>
+
+
+  <div class="modal-box">
+
+
+    <h2>
+      Crypto Transactions
+    </h2>
+
+
+    <label>
+      Date
+    </label>
+
+    <input
+      type="date"
+      id="cryptoDate"
+    >
+
+
+    <label>
+      Transaction
+    </label>
+
+    <select id="cryptoTransactionType">
+
+      <option value="Buy">
+        Buy
+      </option>
+
+      <option value="Sell">
+        Sell
+      </option>
+
+    </select>
+
+
+    <label>
+      Cryptocurrency
+    </label>
+
+    <select id="cryptoName">
+
+      <option value="">
+        Select Cryptocurrency
+      </option>
+
+      <option value="Bitcoin (BTC)">
+        Bitcoin (BTC)
+      </option>
+
+      <option value="Ethereum (ETH)">
+        Ethereum (ETH)
+      </option>
+
+      <option value="Solana (SOL)">
+        Solana (SOL)
+      </option>
+
+      <option value="BNB">
+        BNB
+      </option>
+
+      <option value="XRP">
+        XRP
+      </option>
+
+      <option value="Cardano (ADA)">
+        Cardano (ADA)
+      </option>
+
+      <option value="USDT">
+        USDT
+      </option>
+
+      <option value="USDC">
+        USDC
+      </option>
+
+    </select>
+
+
+    <label>
+      Quantity
+    </label>
+
+    <input
+      type="number"
+      id="cryptoQuantity"
+      placeholder="0.00000000"
+      step="any"
+      min="0"
+      autocomplete="off"
+    >
+
+
+    <label>
+      Unit Price (₱)
+    </label>
+
+    <input
+      type="number"
+      id="cryptoBuyPrice"
+      placeholder="0.00"
+      step="0.01"
+      min="0"
+      autocomplete="off"
+    >
+
+
+    <div class="modal-actions">
+
+      <button onclick="closeCryptoModal()">
+        Cancel
+      </button>
+
+      <button onclick="submitCrypto()">
+        Save
+      </button>
+
+    </div>
+
+
+  </div>
+
+</div>
+
+
+
+<!-- =========================================================
+     BOND MODAL
+========================================================= -->
+
+<div
+  id="bondModal"
+  class="modal"
+>
+
+
+  <div class="modal-box">
+
+
+    <h2>
+      Add Bond Transaction
+    </h2>
+
+
+    <label>
+      Bond Type
+    </label>
+
+    <select id="bondType">
+
+      <option value="">
+        Select
+      </option>
+
+      <option value="TBills">
+        T-Bills
+      </option>
+
+      <option value="RTB">
+        RTB
+      </option>
+
+    </select>
+
+
+    <label>
+      Bond Name
+    </label>
+
+    <input
+      id="bondName"
+      placeholder="Example: RTB 31"
+    >
+
+
+    <label>
+      Date Purchased
+    </label>
+
+    <input
+      type="date"
+      id="bondDate"
+    >
+
+
+    <label>
+      Amount Invested
+    </label>
+
+    <input
+      type="number"
+      id="bondAmount"
+    >
+
+
+    <label>
+      Less Fees
+    </label>
+
+    <input
+      type="number"
+      id="bondFees"
+      value="0"
+    >
+
+
+    <label>
+      APY (%)
+    </label>
+
+    <input
+      type="number"
+      id="bondAPY"
+      step="0.01"
+    >
+
+
+    <div class="modal-actions">
+
+      <button onclick="closeBondModal()">
+        Cancel
+      </button>
+
+      <button onclick="submitBond()">
+        Save
+      </button>
+
+    </div>
+
+
+  </div>
+
+</div>
+
+
+
+<!-- =========================================================
+     COMMODITY MODAL
+========================================================= -->
+
+<div
+  id="commodityModal"
+  class="modal"
+>
+
+
+  <div class="modal-box">
+
+
+    <h2>
+      Metal Transactions
+    </h2>
+
+
+    <label>
+      Date
+    </label>
+
+    <input
+      type="date"
+      id="commodityDate"
+    >
+
+
+    <label>
+      Transaction
+    </label>
+
+    <select
+      id="commodityTransactionType"
+      onchange="commodityTransactionChanged()"
+    >
+
+      <option value="Buy">
+        Buy
+      </option>
+
+      <option value="Sell">
+        Sell
+      </option>
+
+    </select>
+
+
+    <label>
+      Commodity
+    </label>
+
+    <select id="commodityName">
+
+      <option value="">
+        Select Commodity
+      </option>
+
+      <option value="Gold">
+        Gold
+      </option>
+
+      <option value="Silver">
+        Silver
+      </option>
+
+    </select>
+
+
+    <label>
+      Quantity (grams)
+    </label>
+
+    <input
+      type="number"
+      id="commodityQuantity"
+      placeholder="0"
+      step="any"
+      min="0"
+      autocomplete="off"
+    >
+
+
+    <label>
+      Unit Price (PHP per gram)
+    </label>
+
+    <input
+      type="number"
+      id="commodityBuyPrice"
+      placeholder="0.00"
+      step="0.01"
+      min="0"
+      autocomplete="off"
+    >
+
+
+    <div class="modal-actions">
+
+      <button onclick="closeCommodityModal()">
+        Cancel
+      </button>
+
+      <button onclick="submitCommodity()">
+        Save
+      </button>
+
+    </div>
+
+
+  </div>
+
+</div>
+
+
+
+<!-- =========================================================
+     STOCK MODAL
+========================================================= -->
+
+<div
+  id="stockModal"
+  class="modal"
+>
+
+
+  <div class="modal-box">
+
+
+    <h2>
+      Add Stock Transaction
+    </h2>
+
+
+    <label>
+      Date
+    </label>
+
+    <input
+      type="date"
+      id="stockDate"
+    >
+
+
+    <label>
+      Transaction
+    </label>
+
+    <select
+      id="stockTransactionType"
+      onchange="stockTransactionChanged()"
+    >
+
+      <option value="Buy">
+        Buy
+      </option>
+
+      <option value="Sell">
+        Sell
+      </option>
+
+    </select>
+
+
+    <label>
+      Stock
+    </label>
+
+    <select id="stockName">
+
+      <option value="">
+        Select Stock
+      </option>
+
+      <option value="Apple">
+        Apple
+      </option>
+
+      <option value="Microsoft">
+        Microsoft
+      </option>
+
+      <option value="Nvidia">
+        Nvidia
+      </option>
+
+      <option value="Amazon">
+        Amazon
+      </option>
+
+      <option value="Meta">
+        Meta
+      </option>
+
+      <option value="Google">
+        Google
+      </option>
+
+      <option value="Tesla">
+        Tesla
+      </option>
+
+      <option value="Netflix">
+        Netflix
+      </option>
+
+    </select>
+
+
+    <label>
+      Quantity
+    </label>
+
+    <input
+      type="number"
+      id="stockQuantity"
+      placeholder="0"
+      step="any"
+      min="0"
+      autocomplete="off"
+    >
+
+
+    <label>
+      Unit Price (₱)
+    </label>
+
+    <input
+      type="number"
+      id="stockBuyPrice"
+      placeholder="0.00"
+      step="0.01"
+      min="0"
+      autocomplete="off"
+    >
+
+
+    <div class="modal-actions">
+
+      <button onclick="closeStockModal()">
+        Cancel
+      </button>
+
+      <button
+        type="button"
+        onclick="submitStock()"
+      >
+        Save
+      </button>
+
+    </div>
+
+
+  </div>
+
+</div>
+
+
+
+<!-- =========================================================
+     PERSONAL INCOME MODAL
+========================================================= -->
+
+<div
+  id="personalIncomeModal"
+  class="modal"
+>
+
+
+  <div class="modal-box">
+
+
+    <h2>
+      Add Personal Income
+    </h2>
+
+
+    <label>
+      Date
+    </label>
+
+    <input
+      type="date"
+      id="personalIncomeDate"
+    >
+
+
+    <label>
+      Income Source
+    </label>
+
+    <input
+      type="text"
+      id="personalIncomeSource"
+      placeholder="Example: Salary, Freelance"
+    >
+
+
+    <label>
+      Description
+    </label>
+
+    <input
+      type="text"
+      id="personalIncomeDescription"
+      placeholder="Optional"
+    >
+
+
+    <label>
+      Amount
+    </label>
+
+    <input
+      type="number"
+      id="personalIncomeAmount"
+      placeholder="0.00"
+      step="0.01"
+      min="0"
+    >
+
+
+    <div class="modal-actions">
+
+      <button onclick="closePersonalIncomeModal()">
+        Cancel
+      </button>
+
+      <button onclick="submitPersonalIncome()">
+        Save
+      </button>
+
+    </div>
+
+
+  </div>
+
+</div>
+
+
+
+<!-- =========================================================
+     BUSINESS INCOME MODAL
+========================================================= -->
+
+<div
+  id="businessIncomeModal"
+  class="modal"
+>
+
+
+  <div class="modal-box">
+
+
+    <h2>
+      Add Business Income
+    </h2>
+
+
+    <label>
+      Date
+    </label>
+
+    <input
+      type="date"
+      id="businessIncomeDate"
+    >
+
+
+    <label>
+      Business
+    </label>
+
+    <input
+      type="text"
+      id="businessIncomeBusiness"
+      placeholder="Example: ABC Trading"
+    >
+
+
+    <label>
+      Description
+    </label>
+
+    <input
+      type="text"
+      id="businessIncomeDescription"
+      placeholder="Example: Product sales"
+    >
+
+
+    <label>
+      Amount
+    </label>
+
+    <input
+      type="number"
+      id="businessIncomeAmount"
+      placeholder="0.00"
+      step="0.01"
+      min="0"
+    >
+
+
+    <div class="modal-actions">
+
+      <button onclick="closeBusinessIncomeModal()">
+        Cancel
+      </button>
+
+      <button onclick="submitBusinessIncome()">
+        Save
+      </button>
+
+    </div>
+
+
+  </div>
+
+</div>
+
+
+
+<!-- =========================================================
+     CREDIT CARD MODAL
+========================================================= -->
+
+<div
+  id="creditCardModal"
+  class="modal"
+>
+
+
+  <div class="modal-box">
+
+
+    <h2>
+      Add Credit Card
+    </h2>
+
+
+    <label>
+      Card Name
+    </label>
+
+    <input
+      type="text"
+      id="creditCardName"
+      placeholder="Example: BPI Credit Card"
+    >
+
+
+    <label>
+      Credit Limit
+    </label>
+
+    <input
+      type="number"
+      id="creditCardLimit"
+      placeholder="0.00"
+      step="0.01"
+      min="0"
+    >
+
+
+    <label>
+      Current Balance
+    </label>
+
+    <input
+      type="number"
+      id="creditCardBalance"
+      placeholder="0.00"
+      step="0.01"
+      min="0"
+    >
+
+
+    <div class="modal-actions">
+
+      <button onclick="closeCreditCardModal()">
+        Cancel
+      </button>
+
+      <button onclick="submitCreditCard()">
+        Save
+      </button>
+
+    </div>
+
+
+  </div>
+
+</div>
+
+
+
+<!-- =========================================================
+     LOAN MODAL
+========================================================= -->
+
+<div
+  id="loanModal"
+  class="modal"
+>
+
+
+  <div class="modal-box">
+
+
+    <h2>
+      Add Loan
+    </h2>
+
+
+    <label>
+      Loan Name
+    </label>
+
+    <input
+      type="text"
+      id="loanName"
+      placeholder="Example: BDO Personal Loan"
+    >
+
+
+    <label>
+      Loan Type
+    </label>
+
+    <select id="loanType">
+
+      <option value="">
+        Select Loan Type
+      </option>
+
+      <option value="Personal Loan">
+        Personal Loan
+      </option>
+
+      <option value="Car Loan">
+        Car Loan
+      </option>
+
+      <option value="Home Loan">
+        Home Loan
+      </option>
+
+      <option value="Business Loan">
+        Business Loan
+      </option>
+
+      <option value="Credit Loan">
+        Credit Loan
+      </option>
+
+      <option value="Other">
+        Other
+      </option>
+
+    </select>
+
+
+    <label>
+      Loan Date
+    </label>
+
+    <input
+      type="date"
+      id="loanDate"
+    >
+
+
+    <label>
+      Original Loan Amount
+    </label>
+
+    <input
+      type="number"
+      id="loanOriginalAmount"
+      placeholder="0.00"
+      step="0.01"
+      min="0"
+    >
+
+
+    <label>
+      Outstanding Balance
+    </label>
+
+    <input
+      type="number"
+      id="loanOutstandingBalance"
+      placeholder="0.00"
+      step="0.01"
+      min="0"
+    >
+
+
+    <div class="modal-actions">
+
+      <button
+        type="button"
+        onclick="closeLoanModal()"
+      >
+        Cancel
+      </button>
+
+      <button
+        type="button"
+        onclick="submitLoan()"
+      >
+        Save
+      </button>
+
+    </div>
+
+
+  </div>
+
+</div>
+
+
+
+<!-- =========================================================
+     SCRIPTS
+========================================================= -->
+
+<?!= include("scripts"); ?>
+
+
+
+<!-- =========================================================
+     TRANSACTION NOTIFICATION
+========================================================= -->
+
+<div
+  id="transactionModal"
+  class="transaction-modal"
+>
+
+
+  <div class="transaction-card">
+
+
+    <div
+      id="transactionIcon"
+      class="transaction-icon"
+    >
+      <svg
+        viewBox="0 0 24 24"
+        width="30"
+        height="30"
+        aria-hidden="true"
+      >
+
+        <circle
+          cx="12"
+          cy="12"
+          r="9"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        />
+
+        <path
+          d="M12 7V12L15 14"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
+
+      </svg>
+    </div>
+
+
+    <div id="transactionMessage">
+      Saving transaction...
+    </div>
+
+
+  </div>
+
+</div>
+
+
+</body>
+
+</html>
