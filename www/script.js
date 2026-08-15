@@ -6178,79 +6178,84 @@ function loginUser(){
       .value
       .trim();
 
+
   if(!email){
 
-    document.getElementById("loginMessage")
+    document
+      .getElementById("loginMessage")
       .innerHTML =
       "Please enter your email.";
 
     return;
+
   }
 
 
-  google.script.run
+  callAppsScript(
+    "loginUser",
+    {
+      email: email
+    }
+  )
 
-    .withSuccessHandler(function(result){
-
-      if(result.success){
-
-        /*
-         * SAVE LOGGED-IN USER
-         */
-        window.loggedInUser = {
-          email: email
-        };
+  .then(function(result){
 
 
-        /*
-         * HIDE LOGIN
-         */
-        document
-          .getElementById("loginScreen")
-          .style.display = "none";
+    if(result.success){
 
 
-        /*
-         * SHOW APP
-         */
-        document
-          .getElementById("mainApp")
-          .style.display = "flex";
+      window.loggedInUser = {
+        email: email
+      };
 
 
-        /*
-         * LOAD DASHBOARD
-         */
-        loadDashboard();
+      document
+        .getElementById("loginScreen")
+        .style.display = "none";
 
-      }
 
-      else{
+      document
+        .getElementById("mainApp")
+        .style.display = "flex";
 
-        document
-          .getElementById("loginMessage")
-          .innerHTML =
-          result.message;
 
-      }
+      loadDashboard();
 
-    })
 
-    .withFailureHandler(function(error){
+    }
 
-      console.error(
-        "Login Error:",
-        error
-      );
+    else{
+
 
       document
         .getElementById("loginMessage")
         .innerHTML =
-        "Unable to login. Please try again.";
+        result.message;
 
-    })
 
-    .loginUser(email);
+    }
+
+
+  })
+
+
+  .catch(function(error){
+
+
+    console.error(
+      "Login Error:",
+      error
+    );
+
+
+    document
+      .getElementById("loginMessage")
+      .innerHTML =
+      "Unable to login. Please try again.";
+
+
+  });
+
 
 }
 
