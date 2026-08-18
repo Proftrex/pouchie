@@ -2,6 +2,7 @@
 <html>
 
 <head>
+<meta charset="UTF-8">
 
   <base target="_top">
 
@@ -9,7 +10,7 @@
 
   <title>Pouch</title>
 
- <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css">
 
 </head>
 
@@ -27,7 +28,7 @@
 
     
 
-    <h2>Pouchie</h2>
+    <h2>Pouch</h2>
 
     <p>
       Don't put all your pennies in one pouch.
@@ -39,8 +40,8 @@
       placeholder="Email address"
     >
 
-    <button onclick="loginUser()">
-      Enter Pouchie
+    <button id="loginButton" onclick="loginUser()">
+      Enter Pouch
     </button>
 
     <p id="loginMessage"></p>
@@ -90,7 +91,7 @@
   >
 
     <img
-      src="https://i.imgur.com/mc7yaH2.png"
+      src="http://i.imgur.com/mc7yaH2.png"
       alt=""
     >
 
@@ -164,7 +165,7 @@
       >
 
         <img
-          src="https://i.imgur.com/ZkuCQ9d.png"
+          src="https://i.imgur.com/JOZEkQJ.png"
           alt="PDAX Website"
         >
 
@@ -178,7 +179,7 @@
       >
 
         <img
-          src="https://i.imgur.com/rZ8CLrt.png"
+          src="https://i.imgur.com/idyvffe.png"
           alt="Facebook Community"
         >
 
@@ -192,7 +193,7 @@
       >
 
         <img
-          src="https://i.imgur.com/FQeRzLX.png"
+          src="https://i.imgur.com/C5Xt8Md.png"
           alt="Telegram Community"
         >
 
@@ -202,7 +203,7 @@
 
 
     <p class="footer-note">
-      © 2026 Pouchie. All rights reserved.
+      © 2026 Pouch. All rights reserved.
     </p>
 
   </footer>
@@ -300,7 +301,7 @@
       </h3>
 
       <p>
-        Cryptos
+        Crypto Holdings
       </p>
 
     </div>
@@ -350,11 +351,11 @@
 </div>
 
       <h3>
-        Gold & Silver
+        Digital Metals
       </h3>
 
       <p>
-        Precious Metals
+        Gold & Silver
       </p>
 
     </div>
@@ -1454,16 +1455,7 @@
       </button>
 
 
-      <a
-        href="https://pdax.ph"
-        target="_blank"
-      >
 
-        <button class="pdax-action-btn">
-          Start your PDAX Journey
-        </button>
-
-      </a>
 
     </div>
 
@@ -3261,7 +3253,7 @@
      SCRIPTS
 ========================================================= -->
 
-
+<script src="script.js?v=20260817fix"></script>
 
 
 
@@ -3321,7 +3313,33 @@
 </div>
 
 
-<script src="script.js"></script>
+
+
+<!-- MOBILE BOTTOM NAVIGATION -->
+<nav class="mobile-bottom-nav">
+
+  <button onclick="showPage('dashboard')">
+    🏠
+    <span>Home</span>
+  </button>
+
+  <button onclick="showPage('assets')">
+    💰
+    <span>Treasures</span>
+  </button>
+
+  <button onclick="showPage('liabilities')">
+    🔒
+    <span>Open Tabs</span>
+  </button>
+
+  <button onclick="showPage('income')">
+    📊
+    <span>Hardwork</span>
+  </button>
+
+</nav>
+
 
 </body>
 

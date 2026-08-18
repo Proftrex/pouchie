@@ -1,86 +1,60 @@
-/* global SpreadsheetApp, Utilities, Session */
-/* eslint-disable no-unused-vars */
 
 
 
 const APPS_SCRIPT_URL =
-"https://script.google.com/macros/s/AKfycbwpNgBltywiSczQa6GjJ-63kVuFofjKmIAqH1-kgSS2d6Y_m0CLyvcvHkRtYaSRZtS-/exec";
+  "https://script.google.com/macros/s/AKfycbwxty-tQMITEDPD89trNS6Xo29OjtD6CDqOobaUsWKX7JrwkkbGtinBGYICaZVNI_wA/exec";
 
 
-function callAppsScript(action,args=[]){
+function callAppsScript(action, args = []) {
 
-  console.log("SENDING ACTION:", action);
+  return fetch(APPS_SCRIPT_URL, {
 
-  return fetch(
-    APPS_SCRIPT_URL,
-    {
-      method:"POST",
+    method: "POST",
+    mode: "cors",
+    redirect: "follow",
+    cache: "no-store",
 
-      redirect:"follow",
+    headers: {
+      "Content-Type": "application/json",
+      "Accept": "application/json"
+    },
 
-      body:JSON.stringify({
+    body: JSON.stringify({
 
-        action: action,
+      action: action,
 
-        data:{
-          args: args
-        }
+      data: {
+        args: args
+      }
 
-      })
-
-    }
-  )
-  .then(function(response){
-
-    return response.text();
+    })
 
   })
-  .then(function(text){
 
-    console.log("RAW RESPONSE:", text);
+  .then(async function(res){
 
-    console.log("APP SCRIPT TEXT RESPONSE:", text);
+    const text = await res.text();
 
-
+    if(!text){
+      return {};
+    }
 
     try {
 
-      let data = JSON.parse(text);
-
-
-      // Normalize Apps Script responses
-      if(data && typeof data === "object"){
-
-        if(
-          data.success === undefined &&
-          data.status === "success"
-        ){
-          data.success = true;
-        }
-
-
-        if(
-          data.status === undefined &&
-          data.success === true
-        ){
-          data.status = "success";
-        }
-
-      }
-
-
-      return data;
+      return JSON.parse(text);
 
     }
-    catch(e){
+    catch (error) {
 
-      console.error("JSON PARSE FAILED:", e);
+      if(!res.ok){
+        throw new Error(
+          `Apps Script request failed (${res.status}): ${text.slice(0, 300)}`
+        );
+      }
 
-      return {
-        success:false,
-        status:"error",
-        message:text
-      };
+      throw new Error(
+        `Invalid JSON response from Apps Script: ${text.slice(0, 300)}`
+      );
 
     }
 
@@ -89,6 +63,168 @@ function callAppsScript(action,args=[]){
 }
 
 
+/* =========================
+   APPS SCRIPT COMPATIBILITY BRIDGE
+   Allows existing google.script.run
+   calls to work on the static web app.
+========================= */
+
+if (typeof window.google === "undefined") {
+
+  window.google = {};
+
+}
+
+if (!window.google.script) {
+
+  window.google.script = {};
+
+}
+
+if (!window.google.script.run) {
+
+  window.google.script.run = new Proxy(
+    {},
+    {
+
+      get: function(target, property) {
+
+        if (property === "withSuccessHandler") {
+
+          return function(successHandler) {
+
+            return new Proxy(
+              {
+                successHandler: successHandler,
+                failureHandler: null
+              },
+              {
+
+                get: function(obj, prop) {
+
+                  if (prop === "withFailureHandler") {
+
+                    return function(failureHandler) {
+
+                      obj.failureHandler =
+                        failureHandler;
+
+                      return this;
+
+                    };
+
+                  }
+
+
+                  if (prop === "withSuccessHandler") {
+
+                    return function(handler) {
+
+                      obj.successHandler =
+                        handler;
+
+                      return this;
+
+                    };
+
+                  }
+
+
+                  if (
+                    prop === "successHandler" ||
+                    prop === "failureHandler"
+                  ) {
+
+                    return obj[prop];
+
+                  }
+
+
+                  if (
+                    typeof prop === "symbol" ||
+                    prop === "then"
+                  ) {
+
+                    return undefined;
+
+                  }
+
+
+                  return function() {
+
+                    const args =
+                      Array.from(arguments);
+
+
+                    callAppsScript(
+                      String(prop),
+                      args
+                    )
+
+                    .then(function(response) {
+
+                      if (
+                        typeof obj.successHandler ===
+                        "function"
+                      ) {
+
+                        obj.successHandler(response);
+
+                      }
+
+                    })
+
+                    .catch(function(error) {
+
+                      if (
+                        typeof obj.failureHandler ===
+                        "function"
+                      ) {
+
+                        obj.failureHandler(error);
+
+                      }
+                      else {
+
+                        console.error(
+                          "Apps Script Error:",
+                          error
+                        );
+
+                      }
+
+                    });
+
+                  };
+
+                }
+
+              }
+            );
+
+          };
+
+        }
+
+
+        return function() {
+
+          const args =
+            Array.from(arguments);
+
+          return callAppsScript(
+            String(property),
+            args
+          );
+
+        };
+
+      }
+
+    }
+  );
+
+}
 
 
 /* =========================
@@ -98,19 +234,19 @@ function callAppsScript(action,args=[]){
 function detectDevice() {
 
   var isMobile =
-    window.screen.width <= 768 ||
-    window.innerWidth <= 768 ||
-    /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+    !!window.Capacitor ||
+    /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) ||
+    window.innerWidth <= 1100;
 
-  if (isMobile) {
-    document.body.classList.add("mobile-device");
-  } else {
-    document.body.classList.remove("mobile-device");
-  }
+  document.body.classList.toggle("mobile-device", isMobile);
 
 }
 
 window.addEventListener("load", function() {
+  detectDevice();
+});
+
+window.addEventListener("resize", function() {
   detectDevice();
 });
 
@@ -130,8 +266,6 @@ let currentPage = "dashboard";
 ========================= */
 
 function showPage(page, saveHistory = true) {
-
-
 
 
   if(
@@ -287,23 +421,7 @@ function showPage(page, saveHistory = true) {
     if (dashboard)
       dashboard.style.display = "block";
 
-
     loadDashboard();
-
-
-    setTimeout(function(){
-
-      const transactionModal =
-        document.getElementById("transactionModal");
-
-
-      if(transactionModal){
-
-        transactionModal.style.display = "none";
-
-      }
-
-    },800);
 
   }
 
@@ -443,8 +561,6 @@ function showPage(page, saveHistory = true) {
     loadBusinessIncomeSummary();
 
   }
-
-
 
 }
 
@@ -863,14 +979,9 @@ function loadAssets() {
 
 function editLoan(id){
 
+  callAppsScript("getLoans", [])
 
-  callAppsScript(
-    "getLoans",
-    []
-  )
-
-  .then(function(loans){
-
+    .then(function(loans){
 
       const loan =
         loans.find(function(item){
@@ -878,7 +989,6 @@ function editLoan(id){
           return String(item.id) === String(id);
 
         });
-
 
 
       if(!loan){
@@ -890,12 +1000,10 @@ function editLoan(id){
       }
 
 
-
       // Store ID being edited
 
       window.editingLoanId =
         loan.id;
-
 
 
       // Fill loan modal fields
@@ -906,12 +1014,10 @@ function editLoan(id){
         loan.loanName;
 
 
-
       document.getElementById(
         "loanType"
       ).value =
         loan.loanType;
-
 
 
       document.getElementById(
@@ -920,19 +1026,16 @@ function editLoan(id){
         loan.date;
 
 
-
       document.getElementById(
         "loanOriginalAmount"
       ).value =
         loan.originalAmount;
 
 
-
       document.getElementById(
         "loanOutstandingBalance"
       ).value =
         loan.outstandingBalance;
-
 
 
       // Change modal title
@@ -951,7 +1054,6 @@ function editLoan(id){
       }
 
 
-
       // Open modal
 
       document.getElementById(
@@ -959,22 +1061,19 @@ function editLoan(id){
       ).style.display =
         "flex";
 
+    })
 
-    }
+    .catch(function(error){
 
-  );
+      console.error(
+        "Edit Loan Error:",
+        error
+      );
 
-
+    });
 
 }
 
-
-
-
-
-/* =========================
-   TRANSACTIONS
-========================= */
 
 function submitTransaction() {
 
@@ -982,10 +1081,8 @@ function submitTransaction() {
 
     date: document.getElementById("date").value,
 
-    transactionType:
-      document.getElementById("transactionType")
-        ? document.getElementById("transactionType").value
-        : "Buy",
+    transaction:
+      document.getElementById("transactionType").value,
 
     assetType:
       document.getElementById("assetType").value,
@@ -994,44 +1091,26 @@ function submitTransaction() {
       document.getElementById("assetName").value,
 
     quantity:
-      Number(document.getElementById("quantity").value),
+      document.getElementById("quantity").value,
 
     buyPrice:
-      Number(document.getElementById("buyPrice").value)
+      document.getElementById("buyPrice").value
 
   };
 
-  if (
-    !data.date ||
-    !data.assetType ||
-    !data.assetName ||
-    data.quantity <= 0 ||
-    data.buyPrice <= 0
-  ) {
 
-    alert("Please complete all transaction details.");
-    return;
+  callAppsScript("saveTransaction", [data])
 
-  }
+    .then(function(response){
 
-  callAppsScript(
-    "saveTransaction",
-    [data]
-  )
+      if (!response.success) {
 
-  .then(function(response){
-
-      if(
-        !response ||
-        (
-          response.success !== true &&
-          response.status !== "success" &&
-          response.result !== "success"
-        )
-      ){
         alert(response.message);
+
         return;
+
       }
+
 
       alert("Transaction Saved");
 
@@ -1045,21 +1124,18 @@ function submitTransaction() {
 
       loadCryptocurrenciesDashboard();
 
-    }
+    })
 
-  )
-  .catch(function(error){
+    .catch(function(error){
 
       console.error(error);
 
       alert("Transaction failed.");
 
-    }
-
-  );
-
+    });
 
 }
+
 
 function clearTransactionForm() {
 
@@ -1084,10 +1160,7 @@ function clearTransactionForm() {
 
 function loadTransactions() {
 
-  callAppsScript(
-    "getCryptoTransactions",
-    []
-  )
+  callAppsScript("getTransactions", [])
 
     .then(function (data) {
 
@@ -1102,9 +1175,9 @@ function loadTransactions() {
 
         table.innerHTML = `
           <tr>
-            <td colspan="5">
-  No transactions found
-</td>
+            <td colspan="6">
+              No transactions found
+            </td>
           </tr>
         `;
 
@@ -1112,61 +1185,68 @@ function loadTransactions() {
 
       }
 
-
       data.forEach(function (tx) {
 
-        console.log("TRANSACTION ID:", tx.id);
-console.log("ASSET TYPE:", tx.assetType);
-console.log("FULL TRANSACTION:", JSON.stringify(tx));
+        console.log(
+          "TRANSACTION ID:",
+          tx.id
+        );
 
+        console.log(
+          "ASSET TYPE:",
+          tx.assetType
+        );
+
+        console.log(
+          "FULL TRANSACTION:",
+          JSON.stringify(tx)
+        );
 
         const row =
           document.createElement("tr");
 
-row.innerHTML = `
+        row.innerHTML = `
 
-  <td>
-    ${tx.date}
-  </td>
+          <td>
+            ${tx.date}
+          </td>
 
-  <td>
-    ${tx.transactionType}
-  </td>
+          <td>
+            ${tx.transactionType}
+          </td>
 
-  <td>
-    ${tx.assetName}
-  </td>
+          <td>
+            ${tx.assetName}
+          </td>
 
-  <td>
-    ${formatPeso(tx.buyPrice)}
-  </td>
+          <td>
+            ${formatPeso(tx.buyPrice)}
+          </td>
 
-  <td>
-    ${formatPeso(tx.totalAmount)}
-  </td>
+          <td>
+            ${formatPeso(tx.totalAmount)}
+          </td>
 
-<td>
-  <button
-    class="delete-btn"
-    onclick="deleteTransaction('${tx.id}', '${tx.assetType}')">
-    Delete
-  </button>
-</td>
+          <td>
+            <button
+              class="delete-btn"
+              onclick="deleteTransaction('${tx.id}', '${tx.assetType}')">
+              Delete
+            </button>
+          </td>
 
-`;
-
+        `;
 
         table.appendChild(row);
 
-
       });
 
-
     })
-    .catch(function(error){
+
+    .catch(function (error) {
 
       console.error(
-        "Transaction Loading Error:",
+        "Load Transactions Error:",
         error
       );
 
@@ -1178,18 +1258,12 @@ row.innerHTML = `
 
 
 
-
-/* =========================
-   DELETE TRANSACTION
-========================= */
-
-
 function deleteTransaction(id, type){
 
   if(!id){
 
     console.error(
-      "Missing delete ID"
+      "No transaction ID provided."
     );
 
     return;
@@ -1200,248 +1274,883 @@ function deleteTransaction(id, type){
   console.log(
     "DELETE REQUEST:",
     {
-      id:id,
-      type:type
+      id: id,
+      type: type
     }
   );
 
+
+  /*
+   * SHOW DELETING
+   */
 
   showTransactionLoading(
     "Deleting transaction..."
   );
 
 
-  let action = "deleteTransaction";
-  let args = [id, type];
+  /*
+   * SELECT CORRECT DELETE FUNCTION
+   */
+
+  const deleteFunction =
+    type === "Savings"
+      ? "deleteSavings"
+      : "deleteTransaction";
 
 
-  if(type === "Savings"){
+  /*
+   * DELETE FROM GOOGLE SHEETS
+   */
 
-    action = "deleteSavings";
-    args = [id];
-
-  }
-
-
-  else if(type === "Personal Income"){
-
-    action = "deletePersonalIncome";
-    args = [id];
-
-  }
-
-
-  else if(type === "Business Income"){
-
-    action = "deleteBusinessIncome";
-    args = [id];
-
-  }
-
-
-  else if(type === "Stocks"){
-
-    action = "deleteStock";
-    args = [id];
-
-  }
-
+  const args =
+    type === "Savings"
+      ? [id]
+      : [id, type];
 
 
   callAppsScript(
-    action,
+    deleteFunction,
     args
   )
 
-  .then(function(response){
+    .then(function(response){
 
-    console.log(
-      "DELETE RESPONSE:",
-      response
-    );
-
-    console.log(
-      "DELETE RESPONSE JSON:",
-      JSON.stringify(response)
-    );
-
-
-    if(
-      response &&
-      (
-        response.success === true ||
-        response.status === "success" ||
-        response.result === "success"
-      )
-    ){
-
-      showTransactionSuccess(
-        "Transaction deleted successfully."
+      console.log(
+        "DELETE RESPONSE:",
+        response
       );
 
 
-      setTimeout(function(){
+      if(
+        response &&
+        response.success
+      ){
+
+        showTransactionSuccess(
+          "Transaction deleted successfully."
+        );
+
+
+        /*
+         * REFRESH TRANSACTIONS
+         */
+
+        loadTransactions();
+
+
+        /*
+         * REFRESH DASHBOARD
+         */
 
         loadDashboard();
 
-      },500);
+        loadCryptocurrenciesDashboard();
 
 
-      if(type === "Savings"){
-        loadSavings();
-      }
+        /*
+         * REFRESH SAVINGS
+         */
+
+        if(
+          type === "Savings"
+        ){
+
+          loadSavings();
+
+        }
 
 
-      if(type === "Personal Income"){
-        loadPersonalIncome();
-      }
+        /*
+         * REFRESH OTHER ASSET PAGES
+         */
+
+        if(
+          type === "Commodities"
+        ){
+
+          loadCommodities();
+
+        }
 
 
-      if(type === "Business Income"){
-        loadBusinessIncome();
-      }
-
-
-      if(type === "Stocks"){
-
-        setTimeout(function(){
+        if(
+          type === "Stocks"
+        ){
 
           loadStocks();
 
-        },500);
+        }
+
+
+        if(
+          type === "Bonds"
+        ){
+
+          loadBonds();
+
+        }
+
+
+        if(
+          type === "Personal Income"
+        ){
+
+          loadPersonalIncome();
+
+        }
+
+
+        if(
+          type === "Business Income"
+        ){
+
+          loadBusinessIncome();
+
+        }
+
+      }
+      else{
+
+        showTransactionError(
+
+          response &&
+          response.message
+            ? response.message
+            : "Unable to delete transaction."
+
+        );
 
       }
 
+    })
 
-      if(type === "Commodities"){
-        loadCommodities();
-      }
+    .catch(function(error){
 
+      console.error(
+        "Delete Transaction Error:",
+        error
+      );
 
-      if(type === "Bonds"){
-        loadBonds();
-      }
-
-
-      loadTransactions();
-
-
-    }
-    else{
 
       showTransactionError(
-        response?.message ||
         "Unable to delete transaction."
       );
 
-    }
-
-
-  })
-
-
-  .catch(function(error){
-
-    console.error(
-      "DELETE ERROR:",
-      error
-    );
-
-
-    showTransactionError(
-      "Unable to delete transaction."
-    );
-
-  });
-
+    });
 
 }
 
+
+/* =========================
+   DASHBOARD
+========================= */
+
+
+/* =========================
+   DASHBOARD
+========================= */
+
 function loadDashboard() {
 
-  callAppsScript(
-    "getDashboard",
-    []
-  )
+  callAppsScript("getDashboard", [])
 
-  .then(function(data){
+    .then(function(data) {
 
-    console.log(
-      "========== DASHBOARD DATA =========="
-    );
+      console.log(
+        "========== DASHBOARD DATA =========="
+      );
 
-    console.log(
-      "FULL DATA:",
-      data
-    );
+      console.log(
+        "FULL DATA:",
+        data
+      );
+
+      console.log(
+        "ASSETS:",
+        data && data.assets
+      );
+
+      console.log(
+        "PORTFOLIO:",
+        data && data.portfolio
+      );
+
+      console.log(
+        "CATEGORIES:",
+        data && data.categories
+      );
+
+      console.log(
+        "NET WORTH:",
+        data && data.netWorth
+      );
+
+      console.log(
+        "===================================="
+      );
 
 
+      if (!data) return;
 
 
-    if(!data) return;
+      renderDashboard(data);
 
+      renderDashboardCryptocurrencies(
+        data.categories
+      );
 
-    renderDashboard(data);
+      renderDashboardBonds(
+        data.categories
+      );
 
+      renderDashboardCommodities(
+        data.categories
+      );
 
-    loadDashboardSavings();
+      renderDashboardStocks(
+        data.categories
+      );
 
+      loadDashboardSavings();
 
-    loadPersonalIncome();
+      // Refresh Personal Income dashboard figures
+      loadPersonalIncome();
 
+    })
 
-  })
+    .catch(function(error) {
 
-  .catch(function(error){
+      console.error(
+        "========== DASHBOARD ERROR =========="
+      );
 
-    console.error(
-      "========== DASHBOARD ERROR ==========",
-      error
-    );
+      console.error(
+        error
+      );
 
-  });
+      console.error(
+        error && error.message
+      );
+
+    });
 
 }
 
 
 function loadCryptocurrenciesDashboard(){
 
-  callAppsScript(
-    "getDashboard",
-    []
-  )
+  callAppsScript("getDashboard", [])
 
-  .then(function(data){
+    .then(function(data){
 
-    console.log(
-      "CRYPTO DASHBOARD DATA:",
-      data
-    );
+      console.log(
+        "CRYPTO DASHBOARD DATA:",
+        data
+      );
+
+      if(!data) return;
+
+      renderCryptoSummary(data);
+
+      renderCryptoHoldings(data);
+
+    })
+
+    .catch(function(error){
+
+      console.error(
+        "Crypto Dashboard Error:",
+        error
+      );
+
+    });
+
+}
 
 
-    if(!data) return;
+function renderDashboardCryptocurrencies(categories) {
+
+  const container =
+    document.getElementById("dashboardCryptocurrenciesCards");
+
+  if (!container) return;
+
+  container.innerHTML = "";
 
 
-    renderCryptoSummary(data);
+ const displayCategories = [
+    "Cryptocurrencies",
+    "Stablecoins"
+];
 
 
-    renderCryptoHoldings(data);
+  displayCategories.forEach(function(category){
 
 
-  })
+    const assets = (categories || {})[category] || [];
 
-  .catch(function(error){
 
-    console.error(
-      "Crypto Dashboard Error:",
-      error
-    );
+if(assets.length === 0){
+  return;
+}
+
+
+
+    const card =
+      document.createElement("div");
+
+
+    card.className = "asset-card";
+
+
+
+    let html = `
+      <h2>${category}</h2>
+    `;
+
+
+
+    assets.forEach(function(asset){
+
+
+      html += `
+
+        <hr>
+
+        <h3>${asset.assetName}</h3>
+
+
+        <p>
+        Quantity:
+        ${Number(asset.quantity).toLocaleString()}
+        </p>
+
+
+        <p>
+        Current Value:
+        ${formatPeso(asset.currentValue)}
+        </p>
+
+
+        <p class="${asset.pnl >= 0 ? "positive":"negative"}">
+
+        P&L:
+        ${asset.pnl >= 0 ? "+" : ""}
+        ${formatPeso(asset.pnl)}
+
+        </p>
+
+      `;
+
+
+    });
+
+
+
+    card.innerHTML = html;
+
+    container.appendChild(card);
+
+
+  });
+
+
+}
+
+
+
+
+
+
+function renderDashboardBonds(categories){
+
+  const container =
+    document.getElementById("dashboardBondsCards");
+
+  if(!container) return;
+
+  container.innerHTML = "";
+
+  const assets =
+    (categories || {}).Bonds || [];
+
+
+  if(assets.length === 0){
+    return;
+  }
+
+
+  assets.forEach(function(asset){
+
+    const card =
+      document.createElement("div");
+
+
+    card.className =
+      "asset-card";
+
+
+    card.innerHTML = `
+
+      <h3>
+        ${asset.bondName || "Bond"}
+      </h3>
+
+<p>
+Purchase Date:
+${asset.purchaseDate || ""}
+</p>
+
+<p>
+Maturity Date:
+${asset.maturityDate || ""}
+</p>
+
+      <p>
+        Investment:
+        ${formatPeso(asset.netInvestment || 0)}
+      </p>
+
+
+      <p>
+        Interest:
+        ${formatPeso(asset.interestEarned || 0)}
+      </p>
+
+
+      <p>
+        Maturity:
+        ${formatPeso(asset.maturityValue || 0)}
+      </p>
+
+    `;
+
+
+    container.appendChild(card);
 
   });
 
 }
 
 
+function renderBondPortfolio(bonds){
+
+  const container =
+    document.getElementById("bondPortfolioCards");
+
+
+  if(!container) return;
+
+
+  container.innerHTML = "";
+
+
+  if(!bonds || bonds.length === 0){
+
+    container.innerHTML = `
+      <div class="asset-card">
+        No bond holdings yet
+      </div>
+    `;
+
+    return;
+
+  }
+
+
+
+  bonds.forEach(function(bond){
+
+
+    const isClaimed =
+      String(bond.status || "")
+      .toLowerCase()
+      ===
+      "claimed";
+
+
+
+    container.innerHTML += `
+
+    <div class="asset-card">
+
+      <h3>
+        ${bond.bondName}
+      </h3>
+
+
+      <p>
+        Investment:
+        ${formatPeso(bond.netInvestment || 0)}
+      </p>
+
+
+      <p>
+        Current Value:
+        ${formatPeso(bond.currentValue || 0)}
+      </p>
+
+
+      <p class="${bond.pnl >= 0 ? "positive" : "negative"}">
+
+        P&L:
+        ${formatPeso(bond.pnl || 0)}
+
+      </p>
+
+
+      <p>
+        Status:
+        ${bond.status || "Active"}
+      </p>
+
+
+
+      ${
+        !isClaimed
+        ?
+        `
+        <button 
+          class="claim-bond-btn"
+          onclick="claimBond('${bond.id}')">
+
+          Claim Bond
+
+        </button>
+        `
+        :
+        `
+        <button 
+          class="claim-bond-btn"
+          disabled>
+
+          Claimed
+
+        </button>
+        `
+      }
+
+
+    </div>
+
+    `;
+
+
+  });
+
+
+}
+
+
+
+
+function renderDashboardCommodities(categories){
+
+  const container =
+    document.getElementById("dashboardCommoditiesCards");
+
+
+  if(!container) return;
+
+
+  container.innerHTML = "";
+
+
+  const assets =
+    (categories || {}).Commodities || [];
+
+
+  if(assets.length === 0){
+    return;
+  }
+
+
+
+  const card =
+    document.createElement("div");
+
+
+  card.className =
+    "asset-card";
+
+
+
+  let html = `
+
+    <h2>
+      Commodities
+    </h2>
+
+  `;
+
+
+
+  assets.forEach(function(asset){
+
+
+    html += `
+
+      <hr>
+
+
+      <h3>
+        ${asset.assetName}
+      </h3>
+
+
+      <p>
+        Quantity:
+        ${Number(asset.quantity).toLocaleString()}
+        grams
+      </p>
+
+
+      <p>
+        Average Price:
+        ${formatPeso(asset.averagePrice)}
+      </p>
+
+
+      <p>
+        Current Price:
+        ${formatPeso(asset.currentPrice)}
+      </p>
+
+
+      <p>
+        Current Value:
+        ${formatPeso(asset.currentValue)}
+      </p>
+
+
+      <p class="${asset.pnl >= 0 ? "positive":"negative"}">
+
+        P&L:
+        ${asset.pnl >= 0 ? "+" : ""}
+        ${formatPeso(asset.pnl)}
+
+      </p>
+
+
+    `;
+
+
+  });
+
+
+
+  card.innerHTML = html;
+
+
+  container.appendChild(card);
+
+
+}
+
+
+
+
+
+function renderDashboardStocks(categories){
+
+  const container =
+    document.getElementById("dashboardStocksCards");
+
+
+  if(!container) return;
+
+
+  container.innerHTML = "";
+
+
+  const assets =
+    (categories || {}).Stocks || [];
+
+
+  assets.forEach(function(asset){
+
+
+    const card =
+      document.createElement("div");
+
+
+    card.className =
+      "asset-card";
+
+
+    card.innerHTML = `
+
+      <h3>
+        ${asset.assetName}
+      </h3>
+
+
+      <p>
+        Shares:
+        ${Number(asset.quantity).toLocaleString()}
+      </p>
+
+
+      <p>
+        Value:
+        ${formatPeso(asset.currentValue)}
+      </p>
+
+
+      <p class="${asset.pnl >= 0 ? "positive":"negative"}">
+
+        P&L:
+        ${asset.pnl >= 0 ? "+" : ""}
+        ${formatPeso(asset.pnl)}
+
+      </p>
+
+    `;
+
+
+    container.appendChild(card);
+
+
+  });
+
+
+}
+
+
+
+function renderCryptocurrenciesPortfolio(categories){
+
+  const container =
+    document.getElementById("cryptoCards");
+
+  if(!container) return;
+
+  container.innerHTML = "";
+
+  [
+  "Cryptocurrencies",
+  "Stablecoins"
+].forEach(function(category){
+
+    const assets = categories[category];
+
+    if(!assets || assets.length === 0){
+      return;
+    }
+
+    const card = document.createElement("div");
+
+    card.className = "asset-card";
+
+    let html = `
+      <h2>${category}</h2>
+    `;
+
+
+    assets.forEach(function(asset){
+
+      html += `
+
+        <hr>
+
+        <h3>${asset.assetName}</h3>
+
+        <p>
+        Quantity:
+        ${Number(asset.quantity).toLocaleString()}
+        </p>
+
+
+        <p>
+        Average Price:
+        ${formatPeso(asset.averagePrice)}
+        </p>
+
+
+        <p>
+        Current Price:
+        ${formatPeso(asset.currentPrice)}
+        </p>
+
+
+        <p>
+        Current Value:
+        ${formatPeso(asset.currentValue)}
+        </p>
+
+
+        <p class="${asset.pnl >= 0 ? "positive":"negative"}">
+
+        P&L:
+        ${asset.pnl >= 0 ? "+" : ""}
+        ${formatPeso(asset.pnl)}
+
+        </p>
+
+      `;
+
+    });
+
+
+    card.innerHTML = html;
+
+    container.appendChild(card);
+
+  });
+
+}
+
+
+function refreshPrices() {
+
+  const button =
+    document.getElementById("refreshButton");
+
+  if (button) {
+
+    button.disabled = true;
+    button.innerHTML = "Updating...";
+
+  }
+
+
+  callAppsScript("refreshPrices", [])
+
+    .then(function () {
+
+      if (button) {
+
+        button.disabled = false;
+        button.innerHTML = "Refresh Prices";
+
+      }
+
+
+      loadDashboard();
+
+      loadCryptocurrenciesDashboard();
+
+      loadTransactions();
+
+    })
+
+    .catch(function (error) {
+
+      console.error(error);
+
+      if (button) {
+
+        button.disabled = false;
+        button.innerHTML = "Refresh Prices";
+
+      }
+
+      alert("Unable to update prices.");
+
+    });
+
+}
 
 
 function renderCryptoSummary(data){
@@ -1633,131 +2342,101 @@ function renderCryptoHoldings(data){
 
 function loadCryptoSummary(){
 
-  callAppsScript(
-    "getCryptocurrencies",
-    []
-  )
+  callAppsScript("getCryptocurrencies", [])
 
-  .then(function(data){
+    .then(function(data){
 
-    let invested = 0;
-    let current = 0;
-    let pnl = 0;
+      let invested = 0;
+      let current = 0;
+      let pnl = 0;
+
+      (data || []).forEach(function(asset){
+
+        invested += Number(
+          asset.invested || 0
+        );
+
+        current += Number(
+          asset.currentValue || 0
+        );
+
+        pnl += Number(
+          asset.pnl || 0
+        );
+
+      });
 
 
-    (data || []).forEach(function(asset){
+      const investedEl =
+        document.getElementById(
+          "cryptoTotalInvested"
+        );
+
+      if(investedEl){
+
+        investedEl.innerHTML =
+          formatPeso(invested);
+
+      }
 
 
-      invested += Number(
-        asset.invested || 0
+      const currentEl =
+        document.getElementById(
+          "cryptoCurrentValue"
+        );
+
+      if(currentEl){
+
+        currentEl.innerHTML =
+          formatPeso(current);
+
+      }
+
+
+      const pnlEl =
+        document.getElementById(
+          "cryptoTotalPnl"
+        );
+
+      if(pnlEl){
+
+        pnlEl.innerHTML =
+          (pnl >= 0 ? "+" : "") +
+          formatPeso(pnl);
+
+        pnlEl.className =
+          pnl >= 0
+            ? "positive"
+            : "negative";
+
+      }
+
+
+      const assetsEl =
+        document.getElementById(
+          "cryptoTotalAssets"
+        );
+
+      if(assetsEl){
+
+        assetsEl.innerHTML =
+          (data || []).length;
+
+      }
+
+    })
+
+    .catch(function(error){
+
+      console.error(
+        "Crypto Summary Error:",
+        error
       );
-
-
-      current += Number(
-        asset.currentValue || 0
-      );
-
-
-      pnl += Number(
-        asset.pnl || 0
-      );
-
 
     });
 
-
-
-    const investedEl =
-      document.getElementById(
-        "cryptoTotalInvested"
-      );
-
-
-    if(investedEl){
-
-      investedEl.innerHTML =
-        formatPeso(invested);
-
-    }
-
-
-
-    const currentEl =
-      document.getElementById(
-        "cryptoCurrentValue"
-      );
-
-
-    if(currentEl){
-
-      currentEl.innerHTML =
-        formatPeso(current);
-
-    }
-
-
-
-    const pnlEl =
-      document.getElementById(
-        "cryptoTotalPnl"
-      );
-
-
-    if(pnlEl){
-
-      pnlEl.innerHTML =
-        (pnl >= 0 ? "+" : "") +
-        formatPeso(pnl);
-
-
-      pnlEl.className =
-        pnl >= 0
-        ? "positive"
-        : "negative";
-
-    }
-
-
-
-    const assetsEl =
-      document.getElementById(
-        "cryptoTotalAssets"
-      );
-
-
-    if(assetsEl){
-
-      assetsEl.innerHTML =
-        (data || []).length;
-
-    }
-
-
-
-  }
-
-  )
-  .catch(function(error){
-
-    console.error(
-      "Crypto Summary Error:",
-      error
-    );
-
-  }
-
-  );
-
-
-
 }
 
-
-
-
-/* =========================
-   RENDER MAIN DASHBOARD
-========================= */
 
 function renderDashboard(data) {
 
@@ -1765,11 +2444,7 @@ function renderDashboard(data) {
   console.log("DATA RECEIVED:", data);
   console.log("DATA ASSETS:", data?.assets);
   console.log("DATA PORTFOLIO:", data?.portfolio);
-  console.log(
-    "DATA CATEGORIES:",
-    Object.keys(data?.categories || {})
-  );
-
+  console.log("DATA CATEGORIES:", data?.categories);
   console.log("DATA NET WORTH:", data?.netWorth);
   console.log("======================================");
 
@@ -1880,39 +2555,22 @@ function renderDashboard(data) {
 
   const values = {
 
+    dashboardSavings:
+      data.assets?.savings || 0,
+
     dashboardCryptocurrencies:
-      (data.categories?.Cryptocurrencies || [])
-        .reduce(
-          (sum,item)=>sum + Number(item.currentValue || 0),
-          0
-        ),
+      data.assets?.cryptocurrencies || 0,
 
     dashboardBonds:
-      (data.categories?.Bonds || [])
-        .reduce(
-          (sum,item)=>sum + Number(item.currentValue || item.amount || 0),
-          0
-        ),
+      data.assets?.bonds || 0,
 
     dashboardCommodities:
-      (data.categories?.Commodities || [])
-        .reduce(
-          (sum,item)=>sum + Number(item.currentValue || 0),
-          0
-        ),
+      data.assets?.commodities || 0,
 
     dashboardStocks:
-      (data.categories?.Stocks || [])
-        .reduce(
-          (sum,item)=>sum + Number(item.currentValue || 0),
-          0
-        ),
-
-    dashboardSavings:
-      data.categories?.Savings || 0
+      data.assets?.stocks || 0
 
   };
-
 
 
   Object.keys(values).forEach(function(id) {
@@ -2121,12 +2779,9 @@ function renderDashboard(data) {
 
 function loadDashboardSavings() {
 
-  callAppsScript(
-    "getSavingsSummary",
-    []
-  )
+  google.script.run
 
-  .then(function (data) {
+    .withSuccessHandler(function (data) {
 
       const container =
         document.getElementById("dashboardSavingsCards");
@@ -2274,14 +2929,17 @@ function loadDashboardSavings() {
     })
 
 
-    .catch(function(error){
+    .withFailureHandler(function(error){
 
       console.error(
         "Savings Dashboard Error:",
         error
       );
 
-    });
+    })
+
+
+    .getSavingsSummary();
 
 
 }
@@ -2317,11 +2975,8 @@ function loadSavings(){
 
 function loadSavingsBanks() {
 
-  callAppsScript(
-    "getSavingsBanks",
-    []
-  )
-  .then(function(banks) {
+  callAppsScript("getSavingsBanks", [])
+    .then(function(banks) {
 
       const bankDropdown = document.getElementById("savingsBank");
 
@@ -2341,7 +2996,9 @@ function loadSavingsBanks() {
       });
 
     })
-    ;
+    .catch(function(error) {
+      console.error("Savings Banks Error:", error);
+    });
 
 }
 
@@ -2427,12 +3084,9 @@ function toggleWithdrawalBank(){
 function loadAvailableWithdrawalBanks(){
 
 
-  callAppsScript(
-    "getAvailableWithdrawalSources",
-    []
-  )
+  google.script.run
 
-  .then(function(data){
+  .withSuccessHandler(function(data){
 
 
     const dropdown =
@@ -2525,9 +3179,9 @@ function loadAvailableWithdrawalBanks(){
 
 
 
-  }
+  })
 
-  )
+
   .catch(function(error){
 
     console.error(
@@ -2535,22 +3189,16 @@ function loadAvailableWithdrawalBanks(){
       error
     );
 
-  }
-
-  );
-
+  });
 
 
 }
 
 function loadSavingsSummary(){
 
-  callAppsScript(
-    "getSavingsSummary",
-    []
-  )
+  callAppsScript("getSavingsSummary", [])
 
-  .then(function(data){
+    .then(function(data){
 
 
       const container =
@@ -2662,10 +3310,7 @@ function loadSavingsSummary(){
         error
       );
 
-    })
-
-
-    ;
+    });
 
 
 }
@@ -2677,12 +3322,9 @@ function loadSavingsSummary(){
 
 function loadSavingsTransactions(){
 
-  callAppsScript(
-    "getSavingsTransactions",
-    []
-  )
+  callAppsScript("getSavingsTransactions", [])
 
-  .then(function(data){
+    .then(function(data){
 
       console.log(
         "Savings Transactions:",
@@ -2773,11 +3415,13 @@ function loadSavingsTransactions(){
 
               <button
                 class="delete-btn"
-                onclick="deleteTransaction('${tx.id}', 'Savings')">
-                 Delete
+                onclick="deleteTransaction('${tx.id}', 'Savings')"
+              >
+                Delete
               </button>
 
             </td>
+
 
           </tr>
 
@@ -2785,25 +3429,18 @@ function loadSavingsTransactions(){
 
       });
 
-
     })
-
 
     .catch(function(error){
 
       console.error(
-        "Savings Transaction Error:",
+        "Savings Transactions Error:",
         error
       );
 
-    })
-
-
-    ;
+    });
 
 }
-
-
 
 
 function submitSavings(){
@@ -2842,28 +3479,16 @@ function submitSavings(){
 
 
   // SHOW LOADING MODAL
-  showTransactionLoading("Saving savings...");
+  showTransactionLoading();
 
 
 
-  callAppsScript(
-    "saveSavings",
-    [data]
-  )
+  google.script.run
 
-  .then(function(response){
-
-    console.log("CRYPTO BACKEND RESPONSE:", response);
+  .withSuccessHandler(function(response){
 
 
-    if(
-      !response ||
-      (
-        response.success !== true &&
-        response.status !== "success" &&
-        response.result !== "success"
-      )
-    ){
+    if(!response.success){
 
 
       showTransactionError(
@@ -2891,10 +3516,10 @@ function submitSavings(){
     loadDashboard();
 
 
-  }
+  })
 
-  )
-  .catch(function(error){
+
+  .withFailureHandler(function(error){
 
 
     console.error(
@@ -2908,10 +3533,10 @@ function submitSavings(){
     );
 
 
-  }
+  })
 
-  );
 
+  .saveSavings(data);
 
 
 }
@@ -2999,16 +3624,13 @@ function submitWithdrawal(){
 
 
   // SHOW LOADING MODAL
-  showTransactionLoading("Saving withdrawal...");
+  showTransactionLoading();
 
 
 
-  callAppsScript(
-    "saveWithdrawal",
-    [data]
-  )
+  google.script.run
 
-  .then(function(response){
+  .withSuccessHandler(function(response){
 
 
     console.log(
@@ -3018,14 +3640,7 @@ function submitWithdrawal(){
 
 
 
-    if(
-      !response ||
-      (
-        response.success !== true &&
-        response.status !== "success" &&
-        response.result !== "success"
-      )
-    ){
+    if(!response.success){
 
 
       showTransactionError(
@@ -3054,10 +3669,10 @@ function submitWithdrawal(){
 
 
 
-  }
+  })
 
-  )
-  .catch(function(error){
+
+  .withFailureHandler(function(error){
 
 
     console.error(
@@ -3071,10 +3686,10 @@ function submitWithdrawal(){
     );
 
 
-  }
+  })
 
-  );
 
+  .saveWithdrawal(data);
 
 
 
@@ -3134,26 +3749,16 @@ function submitCrypto(){
 
 
   // SHOW LOADING MODAL
-  showTransactionLoading("Saving transaction...");
+  showTransactionLoading();
 
 
 
-  callAppsScript(
-    "saveTransaction",
-    [data]
-  )
+  google.script.run
 
-  .then(function(response){
+  .withSuccessHandler(function(response){
 
 
-    if(
-      !response ||
-      (
-        response.success !== true &&
-        response.status !== "success" &&
-        response.result !== "success"
-      )
-    ){
+    if(!response.success){
 
 
       showTransactionError(
@@ -3183,10 +3788,10 @@ function submitCrypto(){
     loadDashboard();
 
 
-  }
+  })
 
-  )
-  .catch(function(error){
+
+  .withFailureHandler(function(error){
 
 
     console.error(
@@ -3200,10 +3805,10 @@ function submitCrypto(){
     );
 
 
-  }
+  })
 
-  );
 
+  .saveTransaction(data);
 
 
 }
@@ -3281,16 +3886,13 @@ function submitCommodity(){
 
   // SHOW LOADING MODAL
 
-  showTransactionLoading("Saving commodity...");
+  showTransactionLoading();
 
 
 
-  callAppsScript(
-    "saveCommodity",
-    [data]
-  )
+  google.script.run
 
-  .then(function(response){
+  .withSuccessHandler(function(response){
 
 
     console.log(
@@ -3300,14 +3902,7 @@ function submitCommodity(){
 
 
 
-    if(
-      !response ||
-      (
-        response.success !== true &&
-        response.status !== "success" &&
-        response.result !== "success"
-      )
-    ){
+    if(!response || !response.success){
 
 
       showTransactionError(
@@ -3338,10 +3933,10 @@ function submitCommodity(){
 
 
 
-  }
+  })
 
-  )
-  .catch(function(error){
+
+  .withFailureHandler(function(error){
 
 
     console.error(
@@ -3355,10 +3950,10 @@ function submitCommodity(){
     );
 
 
-  }
+  })
 
-  );
 
+  .saveCommodity(data);
 
 
 }
@@ -3433,16 +4028,13 @@ function submitStock(){
 
   // SHOW LOADING MODAL
 
-  showTransactionLoading("Saving stock...");
+  showTransactionLoading();
 
 
 
-  callAppsScript(
-    "saveStock",
-    [data]
-  )
+  google.script.run
 
-  .then(function(response){
+  .withSuccessHandler(function(response){
 
 
     console.log(
@@ -3452,14 +4044,7 @@ function submitStock(){
 
 
 
-    if(
-      !response ||
-      (
-        response.success !== true &&
-        response.status !== "success" &&
-        response.result !== "success"
-      )
-    ){
+    if(!response || !response.success){
 
 
       showTransactionError(
@@ -3484,44 +4069,34 @@ function submitStock(){
 
 
 
-    try {
-      loadStocks();
-    } catch(e) {
-      console.error("loadStocks failed:", e);
-    }
+    loadStocks();
 
-
-    try {
-      loadDashboard();
-    } catch(e) {
-      console.error("loadDashboard failed:", e);
-    }
+    loadDashboard();
 
 
 
-  }
+  })
 
-  )
-  .catch(function(error){
+
+  .withFailureHandler(function(error){
 
 
     console.error(
-      "Stock Error FULL:",
-      error,
-      error?.stack
+      "Stock Error:",
+      error
     );
 
 
 
     showTransactionError(
-      "Stock error: " + error.message
+      "Failed saving stock"
     );
 
 
-  }
+  })
 
-  );
 
+  .saveStock(data);
 
 
 }
@@ -3529,12 +4104,9 @@ function submitStock(){
 
 function loadAvailableCommoditiesForSell(){
 
-  callAppsScript(
-    "getPortfolio",
-    []
-  )
+  google.script.run
 
-  .then(function(portfolio){
+  .withSuccessHandler(function(portfolio){
 
     const dropdown =
       document.getElementById("commodityName");
@@ -3586,10 +4158,10 @@ function loadAvailableCommoditiesForSell(){
     });
 
 
-  }
+  })
 
-  );
 
+  .getPortfolio();
 
 
 }
@@ -3643,12 +4215,9 @@ function commodityTransactionChanged(){
 
 function loadAvailableStocksForSell(){
 
-  callAppsScript(
-    "getPortfolio",
-    []
-  )
+  google.script.run
 
-  .then(function(portfolio){
+  .withSuccessHandler(function(portfolio){
 
 
     const dropdown =
@@ -3705,20 +4274,20 @@ function loadAvailableStocksForSell(){
     });
 
 
-  }
+  })
 
-  )
-  .catch(function(error){
+
+  .withFailureHandler(function(error){
 
     console.error(
       "Loading stocks failed:",
       error
     );
 
-  }
+  })
 
-  );
 
+  .getPortfolio();
 
 
 }
@@ -3832,12 +4401,9 @@ function stockTransactionChanged(){
 
 function loadCommoditySummary(){
 
-  callAppsScript(
-    "getCommodities",
-    []
-  )
+  google.script.run
 
-  .then(function(data){
+  .withSuccessHandler(function(data){
 
     let invested = 0;
     let current = 0;
@@ -3938,20 +4504,20 @@ function loadCommoditySummary(){
 
 
 
-  }
+  })
 
-  )
-  .catch(function(error){
+
+  .withFailureHandler(function(error){
 
     console.error(
       "Commodity Summary Error:",
       error
     );
 
-  }
+  })
 
-  );
 
+  .getCommodities();
 
 }
 
@@ -4021,16 +4587,13 @@ function submitBond(){
 
   // SHOW LOADING CARD
 
-  showTransactionLoading("Saving bond...");
+  showTransactionLoading();
 
 
 
-  callAppsScript(
-    "saveBond",
-    [data]
-  )
+  google.script.run
 
-  .then(function(response){
+  .withSuccessHandler(function(response){
 
 
     console.log(
@@ -4040,14 +4603,7 @@ function submitBond(){
 
 
 
-    if(
-      !response ||
-      (
-        response.success !== true &&
-        response.status !== "success" &&
-        response.result !== "success"
-      )
-    ){
+    if(!response || !response.success){
 
 
       showTransactionError(
@@ -4079,10 +4635,10 @@ function submitBond(){
     loadDashboard();
 
 
-  }
+  })
 
-  )
-  .catch(function(error){
+
+  .withFailureHandler(function(error){
 
 
     console.error(
@@ -4096,10 +4652,10 @@ function submitBond(){
     );
 
 
-  }
+  })
 
-  );
 
+  .saveBond(data);
 
 
 }
@@ -4146,12 +4702,10 @@ function clearBondForm(){
 function loadBonds(){
 
 
-  callAppsScript(
-  "getBondPortfolio",
-  []
-)
+  google.script.run
 
-.then(function(data){
+  .withSuccessHandler(function(data){
+
 
     const container =
       document.getElementById("bondCards");
@@ -4184,10 +4738,34 @@ function loadBonds(){
 
 
 
-    let html = "";
+    const grouped = {};
+
 
 
     data.forEach(function(bond){
+
+
+      if(!grouped[bond.bondType]){
+
+        grouped[bond.bondType] = [];
+
+      }
+
+
+      grouped[bond.bondType].push(bond);
+
+
+    });
+
+
+
+
+    let html = "";
+
+
+
+    Object.keys(grouped)
+    .forEach(function(type){
 
 
       html += `
@@ -4195,80 +4773,96 @@ function loadBonds(){
       <div class="asset-card">
 
         <h2>
-          ${bond.bondName}
+          ${type}
         </h2>
 
-
-        <p>
-          Investment:
-          ${formatPeso(bond.netInvestment)}
-        </p>
+      `;
 
 
-        <p>
-          APY:
+
+      grouped[type]
+      .forEach(function(bond){
+
+
+        html += `
+
+          <hr>
+
+          <h3>
+            ${bond.bondName}
+          </h3>
+
+
+          <p>
+            Investment:
+            ${formatPeso(bond.netInvestment)}
+          </p>
+
+
+          <p>
+            APY:
+            ${bond.apy}%
+          </p>
+
+
+          <p>
+            Purchase Date:
+            ${bond.purchaseDate || ""}
+          </p>
+
+
+          <p>
+            Maturity Date:
+            ${bond.maturityDate || ""}
+          </p>
+
+
+          <p>
+            Interest Earned:
+            ${formatPeso(bond.interestEarned)}
+          </p>
+
+
+          <p>
+            Maturity Value:
+            ${formatPeso(bond.maturityValue)}
+          </p>
+
+
+          <p>
+            Status:
+            <span class="${bond.status === "Active" ? "bond-active" : "bond-matured"}">
+              ${bond.status}
+            </span>
+          </p>
+
+
+
           ${
-            bond.netInvestment > 0
-            ?
-            (((bond.maturityValue - bond.netInvestment) / bond.netInvestment) * 100).toFixed(2)
-            :
-            "0.00"
-          }%
-        </p>
+          bond.status === "Active"
+          ?
+          `
+          <button 
+          class="claim-bond-btn"
+          onclick="claimBond('${bond.id}')">
+
+          🏛️ CLAIM BONDS
+
+          </button>
+          `
+          :
+          ``
+          }
 
 
-        <p>
-          Purchase Date:
-          ${bond.purchaseDate || ""}
-        </p>
+        `;
 
 
-        <p>
-          Maturity Date:
-          ${bond.maturityDate || ""}
-        </p>
+      });
 
 
-        <p>
-          Interest Earned:
-          ${formatPeso(bond.interestEarned)}
-        </p>
 
-
-        <p>
-          Maturity Value:
-          ${formatPeso(bond.maturityValue)}
-        </p>
-
-
-        <p>
-          Status:
-          <span class="${String(bond.status).trim().toLowerCase() === "active" ? "bond-active" : "bond-matured"}">
-            ${bond.status}
-          </span>
-        </p>
-
-
-        ${
-        String(bond.status).trim().toLowerCase() === "active"
-        ?
-        `
-        <button
-        class="claim-bond-btn"
-        onclick="claimBond('${bond.id}')">
-
-        <img 
-src="https://i.imgur.com/eBWcDxQ.png"
-class="claim-bond-icon">
-
-CLAIM BONDS
-
-        </button>
-        `
-        :
-        ``
-        }
-
+      html += `
 
       </div>
 
@@ -4278,6 +4872,7 @@ CLAIM BONDS
     });
 
 
+
     container.innerHTML = html;
 
 
@@ -4285,7 +4880,7 @@ CLAIM BONDS
   })
 
 
-  .catch(function(error){
+  .withFailureHandler(function(error){
 
     console.error(
       "Bond Loading Error:",
@@ -4295,7 +4890,7 @@ CLAIM BONDS
   })
 
 
-  ;
+  .getBonds();
 
 
 
@@ -4303,12 +4898,9 @@ CLAIM BONDS
 
 
 
-  callAppsScript(
-  "getBondSummary",
-  []
-)
+  google.script.run
 
-.then(function(summary){
+  .withSuccessHandler(function(summary){
 
 
     console.log(
@@ -4373,7 +4965,7 @@ CLAIM BONDS
   })
 
 
-  .catch(function(error){
+  .withFailureHandler(function(error){
 
     console.error(
       "Bond Summary Error:",
@@ -4383,7 +4975,7 @@ CLAIM BONDS
   })
 
 
-  ;
+  .getBondSummary();
 
 
   loadBondTransactions();
@@ -4398,32 +4990,19 @@ function claimBond(bondId){
 
   console.log("CLICKED BOND ID:", bondId);
 
-  showTransactionLoading("Claiming bond...");
+  showTransactionLoading();
 
 
-  callAppsScript(
-    "claimBond",
-    [bondId]
-  )
+  google.script.run
 
-  .then(function(response){
+  .withSuccessHandler(function(response){
 
     console.log("CLAIM RESPONSE:", response);
 
 
-    if(
-      !response ||
-      (
-        response.success !== true &&
-        response.status !== "success" &&
-        response.result !== "success"
-      )
-    ){
+    if(!response.success){
 
-      showTransactionError(
-        response?.message ||
-        "Unable to claim bond."
-      );
+      showTransactionError(response.message);
 
       return;
 
@@ -4437,10 +5016,10 @@ function claimBond(bondId){
     loadDashboard();
 
 
-  }
+  })
 
-  )
-  .catch(function(error){
+
+  .withFailureHandler(function(error){
 
     console.error(
       "Claim Bond Error:",
@@ -4452,10 +5031,10 @@ function claimBond(bondId){
       "Unable to claim bond."
     );
 
-  }
+  })
 
-  );
 
+  .claimBond(bondId);
 
 }
 
@@ -4468,12 +5047,9 @@ function claimBond(bondId){
 
 function loadBondTransactions(){
 
-  callAppsScript(
-    "getBondTransactions",
-    []
-  )
+  google.script.run
 
-    .then(function(data){
+    .withSuccessHandler(function(data){
 
       console.log(
         "Bond Transactions:",
@@ -4510,7 +5086,7 @@ function loadBondTransactions(){
 
           <tr>
 
-            <td colspan="7">
+            <td colspan="6">
               No bond transactions yet
             </td>
 
@@ -4587,7 +5163,7 @@ function loadBondTransactions(){
     })
 
 
-    .catch(function(error){
+    .withFailureHandler(function(error){
 
       console.error(
         "Bond Transaction Loading Error:",
@@ -4597,7 +5173,7 @@ function loadBondTransactions(){
     })
 
 
-    ;
+    .getBondTransactions();
 
 }
 
@@ -4617,6 +5193,10 @@ function deleteBondTransaction(id){
 
   if(!id){
 
+    console.error(
+      "No Bond ID provided."
+    );
+
     showTransactionError(
       "Bond ID is missing."
     );
@@ -4631,66 +5211,58 @@ function deleteBondTransaction(id){
   );
 
 
-  callAppsScript(
-    "deleteBond",
-    [id]
-  )
+  callAppsScript("deleteBond", [id])
 
-  .then(function(response){
+    .then(function(response){
 
-    console.log(
-      "BOND DELETE RESPONSE:",
-      response
-    );
-
-
-    if(
-      response &&
-      (
-        response.success === true ||
-        response.status === "success" ||
-        response.result === "success"
-      )
-    ){
-
-      showTransactionSuccess(
-        "Bond deleted successfully."
+      console.log(
+        "BOND DELETE RESPONSE:",
+        response
       );
 
 
-      loadBonds();
+      if(
+        response &&
+        response.success
+      ){
 
-      loadDashboard();
+        showTransactionSuccess(
+          "Bond deleted successfully."
+        );
 
-      loadBondTransactions();
 
-    }
-    else{
+        loadBonds();
+
+        loadDashboard();
+
+        loadBondTransactions();
+
+      }
+      else{
+
+        showTransactionError(
+          response && response.message
+            ? response.message
+            : "Unable to delete bond."
+        );
+
+      }
+
+    })
+
+    .catch(function(error){
+
+      console.error(
+        "Bond Delete Error:",
+        error
+      );
+
 
       showTransactionError(
-        response?.message ||
         "Unable to delete bond."
       );
 
-    }
-
-
-  })
-
-  .catch(function(error){
-
-    console.error(
-      "Bond Delete Error:",
-      error
-    );
-
-
-    showTransactionError(
-      "Unable to delete bond."
-    );
-
-  });
-
+    });
 
 }
 
@@ -4725,12 +5297,9 @@ function loadCommodities(){
 
 
 
-  callAppsScript(
-    "getCommodities",
-    []
-  )
+  google.script.run
 
-  .then(function(data){
+  .withSuccessHandler(function(data){
 
 
     const container =
@@ -4829,20 +5398,20 @@ function loadCommodities(){
 
 
 
-  }
+  })
 
-  )
-  .catch(function(error){
+
+  .withFailureHandler(function(error){
 
     console.error(
       "Commodity Loading Error:",
       error
     );
 
-  }
+  })
 
-  );
 
+  .getCommodities();
 
 
 }
@@ -4853,12 +5422,9 @@ function loadCommodities(){
 
 function loadCommodityTransactions(){
 
-  callAppsScript(
-    "getCommodityTransactions",
-    []
-  )
+  google.script.run
 
-  .then(function(data){
+    .withSuccessHandler(function(data){
 
       console.log(
         "Commodity Transactions:",
@@ -4892,7 +5458,7 @@ function loadCommodityTransactions(){
 
           <tr>
 
-            <td colspan="7">
+            <td colspan="6">
               No transactions found
             </td>
 
@@ -4973,20 +5539,20 @@ function loadCommodityTransactions(){
       table.innerHTML = html;
 
 
-    }
+    })
 
-  )
-  .catch(function(error){
+
+    .withFailureHandler(function(error){
 
       console.error(
         "Commodity Transaction Error:",
         error
       );
 
-    }
+    })
 
-  );
 
+    .getCommodityTransactions();
 
 }
 
@@ -5006,12 +5572,9 @@ function loadStocks(){
   loadStockTransactions();
 
 
-  callAppsScript(
-  "getStockPortfolio",
-  []
-)
+  google.script.run
 
-.then(function(data){
+  .withSuccessHandler(function(data){
 
 
 
@@ -5122,7 +5685,7 @@ function loadStocks(){
   })
 
 
-  .catch(function(error){
+  .withFailureHandler(function(error){
 
 
     console.error(
@@ -5145,12 +5708,9 @@ function loadStocks(){
 
 function loadStockSummary(){
 
-  callAppsScript(
-  "getStocks",
-  []
-)
+  google.script.run
 
-.then(function(data){
+  .withSuccessHandler(function(data){
 
 
     let invested = 0;
@@ -5251,7 +5811,7 @@ function loadStockSummary(){
   })
 
 
-  .catch(function(error){
+  .withFailureHandler(function(error){
 
     console.error(
       "Stock Summary Error:",
@@ -5261,19 +5821,16 @@ function loadStockSummary(){
   })
 
 
-  ;
+  .getStocks();
 
 
 }
 
 function loadStockTransactions(){
 
-  callAppsScript(
-  "getStockTransactions",
-  []
-)
+  google.script.run
 
-.then(function(data){
+    .withSuccessHandler(function(data){
 
       const table =
         document.getElementById(
@@ -5293,7 +5850,7 @@ function loadStockTransactions(){
 
           <tr>
 
-            <td colspan="7">
+            <td colspan="6">
               No transactions found
             </td>
 
@@ -5369,7 +5926,7 @@ function loadStockTransactions(){
     })
 
 
-    .catch(function(error){
+    .withFailureHandler(function(error){
 
       console.error(
         "Stock Transaction Error:",
@@ -5379,7 +5936,7 @@ function loadStockTransactions(){
     })
 
 
-    ;
+    .getStockTransactions();
 
 }
 
@@ -5391,7 +5948,7 @@ function loadStockTransactions(){
    TRANSACTION MODAL
 ========================= */
 
-function showTransactionLoading(text = "Loading transaction..."){
+function showTransactionLoading(){
 
   const modal =
     document.getElementById("transactionModal");
@@ -5427,11 +5984,7 @@ function showTransactionLoading(text = "Loading transaction..."){
 
   if(icon){
 
-    icon.innerHTML = `
-<img 
-src="https://i.imgur.com/mDFTPEN.png"
-class="transaction-loading-icon">
-`;
+    icon.innerHTML = "⏳";
 
   }
 
@@ -5439,7 +5992,7 @@ class="transaction-loading-icon">
   if(message){
 
     message.innerHTML =
-      text;
+      "Saving transaction...";
 
   }
 
@@ -5591,9 +6144,7 @@ function showTransactionModal(message){
       <div class="transaction-card">
 
         <div id="transactionIcon">
-          <img 
-          src="https://i.imgur.com/mDFTPEN.png"
-          class="transaction-loading-icon">
+          ⏳
         </div>
 
         <div id="transactionMessage">
@@ -5704,20 +6255,15 @@ function confirmClaimAction(){
 }
 
 
+
 function loginUser(){
-
-  const loginButton = document.getElementById("loginButton");
-
-  if(loginButton){
-    loginButton.innerHTML = "Logging in...";
-    loginButton.disabled = true;
-  }
 
   const email =
     document
       .getElementById("loginEmail")
       .value
-      .trim();
+      .trim()
+      .toLowerCase();
 
 
   if(!email){
@@ -5732,29 +6278,14 @@ function loginUser(){
   }
 
 
-  showTransactionLoading(
-    "Logging in..."
-  );
-
-
   callAppsScript(
     "loginUser",
-    [
-      email
-    ]
+    [email]
   )
 
   .then(function(result){
 
-
-    console.log(
-      "LOGIN RESPONSE:",
-      result
-    );
-
-
     if(result.success){
-
 
       window.loggedInUser = {
         email: email
@@ -5771,336 +6302,37 @@ function loginUser(){
         .style.display = "flex";
 
 
-      const transactionModal =
-        document.getElementById("transactionModal");
-
-
-      if(transactionModal){
-
-        transactionModal.style.display = "none";
-
-      }
-
-
       loadDashboard();
 
-
     }
-
     else{
-
 
       document
         .getElementById("loginMessage")
         .innerHTML =
-         "Access request received. Please come back within 72 hours to gain access of the app.";
-
+        result.message || "Access denied.";
 
     }
 
-
   })
-
 
   .catch(function(error){
 
+    console.error("Login Error:", error);
 
-    console.error(
-      "LOGIN ERROR:",
-      error
-    );
-
+    const message =
+      error && error.message
+        ? error.message
+        : "Unable to login. Please try again.";
 
     document
       .getElementById("loginMessage")
       .innerHTML =
-      "Unable to login. Please try again.";
-
-    const loginButton = document.getElementById("loginButton");
-
-    if(loginButton){
-      loginButton.innerHTML = "Enter Pouch";
-      loginButton.disabled = false;
-    }
-
+      message;
 
   });
 
-
 }
-
-
-
-/* =========================
-   PERSONAL INCOME MODAL
-========================= */
-function loadPersonalIncome(){
-
-  callAppsScript(
-    "getPersonalIncome",
-    []
-  )
-
-  .then(function(data){
-
-      console.log("Personal Income Data:", data);
-
-      data = data || [];
-
-
-      /* =========================
-         INCOME SOURCES
-      ========================= */
-
-      const cards =
-        document.getElementById("personalIncomeCards");
-
-      if(cards){
-
-        cards.innerHTML = "";
-
-
-        if(data.length === 0){
-
-          cards.innerHTML = `
-            <div class="asset-card">
-              <h3>No income sources yet</h3>
-            </div>
-          `;
-
-        }
-        else{
-
-          const sources = {};
-
-
-          data.forEach(function(income){
-
-            const source =
-              String(income.source || "Other").trim();
-
-            const amount =
-              Number(income.amount) || 0;
-
-
-            if(!sources[source]){
-              sources[source] = 0;
-            }
-
-
-            sources[source] += amount;
-
-          });
-
-
-          Object.keys(sources).forEach(function(source){
-
-            cards.innerHTML += `
-
-              <div class="asset-card">
-
-                <h2>
-                  ${source}
-                </h2>
-
-                <p>
-                  Total Income:
-                  ${formatPeso(sources[source])}
-                </p>
-
-              </div>
-
-            `;
-
-          });
-
-        }
-
-      }
-
-
-      /* =========================
-         INCOME HISTORY
-      ========================= */
-
-      const table =
-        document.getElementById(
-          "personalIncomeTransactionTable"
-        );
-
-
-      if(!table){
-
-        console.error(
-          "personalIncomeTransactionTable not found"
-        );
-
-        return;
-
-      }
-
-
-      table.innerHTML = "";
-
-
-      if(data.length === 0){
-
-        table.innerHTML = `
-
-          <tr>
-
-            <td colspan="4">
-              No personal income recorded yet.
-            </td>
-
-          </tr>
-
-        `;
-
-        return;
-
-      }
-
-
-      data.forEach(function(income){
-
-        table.innerHTML += `
-
-          <tr>
-
-            <td>
-              ${income.date || ""}
-            </td>
-
-            <td>
-              ${income.source || ""}
-            </td>
-
-            <td>
-              ${formatPeso(
-                Number(income.amount) || 0
-              )}
-            </td>
-
-            <td>
-
-              <button
-                type="button"
-                class="delete-btn"
-                onclick="deleteTransaction('${income.id}', 'Personal Income')">
-
-                  Delete
-
-              </button>
-
-            </td>
-
-          </tr>
-
-        `;
-
-      });
-
-    }
-
-  )
-  .catch(function(error){
-
-      console.error(
-        "Personal Income Loading Error:",
-        error
-      );
-
-    }
-
-  );
-
-
-
-  /* =========================
-     PERSONAL INCOME SUMMARY
-  ========================= */
-
-  callAppsScript(
-    "getPersonalIncomeSummary",
-    []
-  )
-
-  .then(function(summary){
-
-      console.log(
-        "Personal Income Summary:",
-        summary
-      );
-
-
-      if(!summary) return;
-
-
-      const monthly =
-        document.getElementById(
-          "personalIncomeMonthly"
-        );
-
-
-      if(monthly){
-
-        monthly.innerHTML =
-          formatPeso(
-            Number(summary.monthly) || 0
-          );
-
-      }
-
-
-      const yearly =
-        document.getElementById(
-          "personalIncomeYearly"
-        );
-
-
-      if(yearly){
-
-        yearly.innerHTML =
-          formatPeso(
-            Number(summary.yearly) || 0
-          );
-
-      }
-
-
-      const average =
-        document.getElementById(
-          "personalIncomeAverage"
-        );
-
-
-      if(average){
-
-        average.innerHTML =
-          formatPeso(
-            Number(summary.average) || 0
-          );
-
-      }
-
-    }
-
-  )
-  .catch(function(error){
-
-      console.error(
-        "Personal Income Summary Error:",
-        error
-      );
-
-    }
-
-  );
-
-
-}
-
 
 
 function openPersonalIncomeModal(){
@@ -6206,15 +6438,12 @@ function submitPersonalIncome(){
 
   // SHOW LOADING MODAL
 
-  showTransactionLoading("Saving personal income...");
+  showTransactionLoading();
 
 
-  callAppsScript(
-    "savePersonalIncome",
-    [data]
-  )
+  callAppsScript("savePersonalIncome", [data])
 
-  .then(function(response){
+    .then(function(response){
 
       console.log(
         "Personal Income Response:",
@@ -6224,11 +6453,7 @@ function submitPersonalIncome(){
 
       if(
         !response ||
-        (
-          response.success !== true &&
-          response.status !== "success" &&
-          response.result !== "success"
-        )
+        !response.success
       ){
 
         showTransactionError(
@@ -6257,10 +6482,10 @@ function submitPersonalIncome(){
       loadDashboard();
 
 
-    }
+    })
 
-  )
-  .catch(function(error){
+
+    .catch(function(error){
 
       console.error(
         "Personal Income Error:",
@@ -6272,10 +6497,7 @@ function submitPersonalIncome(){
         "Failed saving personal income."
       );
 
-    }
-
-  );
-
+    });
 
 }
 
@@ -6298,12 +6520,9 @@ function submitPersonalIncome(){
 
 function loadBusinessIncome(){
 
-  callAppsScript(
-    "getBusinessIncome",
-    []
-  )
+  google.script.run
 
-  .then(function(data){
+    .withSuccessHandler(function(data){
 
       console.log(
         "Business Income Data:",
@@ -6506,20 +6725,20 @@ function loadBusinessIncome(){
 
       });
 
-    }
+    })
 
-  )
-  .catch(function(error){
+
+    .withFailureHandler(function(error){
 
       console.error(
         "Business Income Loading Error:",
         error
       );
 
-    }
+    })
 
-  );
 
+    .getBusinessIncome();
 
 
   /*
@@ -6528,12 +6747,9 @@ function loadBusinessIncome(){
    * =========================
    */
 
-  callAppsScript(
-    "getBusinessIncomeSummary",
-    []
-  )
+  google.script.run
 
-  .then(function(summary){
+    .withSuccessHandler(function(summary){
 
       console.log(
         "Business Income Summary:",
@@ -6603,20 +6819,20 @@ function loadBusinessIncome(){
 
       }
 
-    }
+    })
 
-  )
-  .catch(function(error){
+
+    .withFailureHandler(function(error){
 
       console.error(
         "Business Income Summary Error:",
         error
       );
 
-    }
+    })
 
-  );
 
+    .getBusinessIncomeSummary();
 
 }
 
@@ -6777,20 +6993,9 @@ function submitBusinessIncome(){
    * SAVE TO GOOGLE SHEETS
    */
 
-  const data = {
-    date: date,
-    business: business,
-    description: description,
-    amount: amount
-  };
+  google.script.run
 
-
-  callAppsScript(
-    "saveBusinessIncome",
-    [data]
-  )
-
-  .then(function(result){
+    .withSuccessHandler(function(result){
 
       if(
         result &&
@@ -6851,10 +7056,10 @@ function submitBusinessIncome(){
 
       }
 
-    }
+    })
 
-  )
-  .catch(function(error){
+
+    .withFailureHandler(function(error){
 
       console.error(
         "Business Income Save Error:",
@@ -6869,7 +7074,17 @@ function submitBusinessIncome(){
     })
 
 
-    ;
+    .saveBusinessIncome({
+
+      date: date,
+
+      business: business,
+
+      description: description,
+
+      amount: amount
+
+    });
 
 }
 
@@ -6882,12 +7097,9 @@ function submitBusinessIncome(){
 
 function loadBusinessIncomeSummary(){
 
-  callAppsScript(
-    "getBusinessIncomeSummary",
-    []
-  )
+  google.script.run
 
-  .then(function(data){
+    .withSuccessHandler(function(data){
 
       console.log(
         "Business Income Summary:",
@@ -6957,17 +7169,17 @@ function loadBusinessIncomeSummary(){
     })
 
 
-    .catch(function(error){
+    .withFailureHandler(function(error){
 
       console.error(
         "Business Income Summary Error:",
         error
       );
 
-    }
+    })
 
-  );
 
+    .getBusinessIncomeSummary();
 
 }
 
@@ -6979,12 +7191,9 @@ function loadBusinessIncomeSummary(){
 
 function loadCreditCards(){
 
-  callAppsScript(
-    "getCreditCards",
-    []
-  )
+  google.script.run
 
-  .then(function(data){
+    .withSuccessHandler(function(data){
 
       console.log(
         "Credit Cards Data:",
@@ -7024,7 +7233,7 @@ function loadCreditCards(){
     alt="Loan"
     class="loan-icon"
   >
-  Credit Card
+  ${loan.loanName}
 </h3>
 
             <p>
@@ -7228,20 +7437,20 @@ function loadCreditCards(){
 
       }
 
-    }
+    })
 
-  )
-  .catch(function(error){
+
+    .withFailureHandler(function(error){
 
       console.error(
         "Credit Cards Loading Error:",
         error
       );
 
-    }
+    })
 
-  );
 
+    .getCreditCards();
 
 }
 
@@ -7343,22 +7552,12 @@ function submitCreditCard(){
   if(data.id){
 
 
-    callAppsScript(
-    "updateCreditCard",
-    [data]
-  )
+    google.script.run
 
-  .then(function(response){
+      .withSuccessHandler(function(response){
 
 
-        if(
-          response &&
-          (
-            response.success === true ||
-            response.status === "success" ||
-            response.result === "success"
-          )
-        ){
+        if(response.success){
 
   showTransactionSuccess(
     "Credit card updated successfully."
@@ -7385,10 +7584,9 @@ function submitCreditCard(){
         }
 
 
-      }
+      })
 
-  );
-
+      .updateCreditCard(data);
 
 
     return;
@@ -7402,22 +7600,12 @@ function submitCreditCard(){
   // =========================
 
 
-  callAppsScript(
-    "saveCreditCard",
-    [data]
-  )
+  google.script.run
 
-  .then(function(response){
+    .withSuccessHandler(function(response){
 
 
-      if(
-        response &&
-        (
-          response.success === true ||
-          response.status === "success" ||
-          response.result === "success"
-        )
-      ){
+      if(response.success){
 
 
         showTransactionSuccess(
@@ -7441,10 +7629,9 @@ function submitCreditCard(){
       }
 
 
-    }
+    })
 
-  );
-
+    .saveCreditCard(data);
 
 
 }
@@ -7462,12 +7649,9 @@ function loadLoans(){
   console.log("🔥 LOAD LOANS FIRED");
 
 
-  callAppsScript(
-    "getLoans",
-    []
-  )
+  google.script.run
 
-  .then(function(data){
+    .withSuccessHandler(function(data){
 
       console.log(
         "Loans Data:",
@@ -7607,7 +7791,7 @@ function loadLoans(){
         class="loan-icon"
       >
 
-      Credit Card
+      ${loan.loanName}
 
     </h3>
 
@@ -7763,10 +7947,11 @@ function loadLoans(){
 
 
 
-    }
+    })
 
-  )
-  .catch(function(error){
+
+
+    .withFailureHandler(function(error){
 
 
       console.error(
@@ -7775,10 +7960,11 @@ function loadLoans(){
       );
 
 
-    }
+    })
 
-  );
 
+
+    .getLoans();
 
 
 }
@@ -7983,12 +8169,9 @@ function submitLoan(){
   );
 
 
-  callAppsScript(
-    "deleteLoan",
-    [id]
-  )
+  google.script.run
 
-  .then(function(result){
+    .withSuccessHandler(function(result){
 
       if(
         result &&
@@ -8050,10 +8233,10 @@ function submitLoan(){
 
       }
 
-    }
+    })
 
-  )
-  .catch(function(error){
+
+    .withFailureHandler(function(error){
 
       console.error(
         "Loan Save Error:",
@@ -8071,28 +8254,11 @@ function submitLoan(){
     if(id){
 
 
-  callAppsScript(
-    "updateLoan",
-    [{
-      id:id,
-      loanName:loanName,
-      loanType:loanType,
-      date:loanDate,
-      originalAmount:originalAmount,
-      outstandingBalance:outstandingBalance
-    }]
-  )
+  google.script.run
 
-  .then(function(result){
+    .withSuccessHandler(function(result){
 
-      if(
-        result &&
-        (
-          result.success === true ||
-          result.status === "success" ||
-          result.result === "success"
-        )
-      ){
+      if(result && result.success){
 
         showTransactionSuccess(
           "Loan updated successfully."
@@ -8119,7 +8285,7 @@ function submitLoan(){
     })
 
 
-    .catch(function(error){
+    .withFailureHandler(function(error){
 
       console.error(
         "Loan Update Error:",
@@ -8133,34 +8299,38 @@ function submitLoan(){
 
     })
 
-  ;
+
+    .updateLoan({
+
+      id:id,
+
+      loanName:
+        loanName,
+
+      loanType:
+        loanType,
+
+      date:
+        loanDate,
+
+      originalAmount:
+        originalAmount,
+
+      outstandingBalance:
+        outstandingBalance
+
+    });
 
 
 }
 else{
 
 
-  callAppsScript(
-    "saveLoan",
-    [{
-      loanName:loanName,
-      loanType:loanType,
-      date:loanDate,
-      originalAmount:originalAmount,
-      outstandingBalance:outstandingBalance
-    }]
-  )
+  google.script.run
 
-  .then(function(result){
+    .withSuccessHandler(function(result){
 
-      if(
-        result &&
-        (
-          result.success === true ||
-          result.status === "success" ||
-          result.result === "success"
-        )
-      ){
+      if(result && result.success){
 
         showTransactionSuccess(
           "Loan saved successfully."
@@ -8184,7 +8354,7 @@ else{
     })
 
 
-    .catch(function(error){
+    .withFailureHandler(function(error){
 
       console.error(
         "Loan Save Error:",
@@ -8198,7 +8368,25 @@ else{
 
     })
 
-  ;
+
+    .saveLoan({
+
+      loanName:
+        loanName,
+
+      loanType:
+        loanType,
+
+      date:
+        loanDate,
+
+      originalAmount:
+        originalAmount,
+
+      outstandingBalance:
+        outstandingBalance
+
+    });
 
 }
 
@@ -8209,29 +8397,6 @@ else{
 /* =========================
    SUBMIT EXPENSE
 ========================= */
-
-
-
-function closeExpenseModal(){
-
-  const modal =
-    document.getElementById("expenseModal");
-
-  if(modal){
-    modal.style.display = "none";
-  }
-
-}
-
-
-
-function loadExpenses(){
-
-  console.log(
-    "Expenses reload requested"
-  );
-
-}
 
 function submitExpense(){
 
@@ -8328,18 +8493,9 @@ function submitExpense(){
    * SAVE TO GOOGLE SHEETS
    */
 
-  callAppsScript(
-    "saveExpense",
-    [{
-      name:expenseName,
-      category:expenseCategory,
-      date:expenseDate,
-      amount:expenseAmount,
-      description:expenseDescription
-    }]
-  )
+  google.script.run
 
-  .then(function(result){
+    .withSuccessHandler(function(result){
 
       if(
         result &&
@@ -8408,7 +8564,7 @@ function submitExpense(){
     })
 
 
-    .catch(function(error){
+    .withFailureHandler(function(error){
 
       console.error(
         "Expense Save Error:",
@@ -8422,7 +8578,25 @@ function submitExpense(){
 
     })
 
-    ;
+
+    .saveExpense({
+
+      expenseName:
+        expenseName,
+
+      category:
+        expenseCategory,
+
+      date:
+        expenseDate,
+
+      amount:
+        expenseAmount,
+
+      description:
+        expenseDescription
+
+    });
 
 }
 
@@ -8451,12 +8625,9 @@ function deleteLoan(id){
   }
 
 
-  callAppsScript(
-    "deleteLoan",
-    [id]
-  )
+  google.script.run
 
-  .then(function(response){
+    .withSuccessHandler(function(response){
 
       console.log(
         "DELETE LOAN RESPONSE:",
@@ -8491,7 +8662,7 @@ function deleteLoan(id){
     })
 
 
-    .catch(function(error){
+    .withFailureHandler(function(error){
 
       console.error(
         "DELETE LOAN FAILED:",
@@ -8503,10 +8674,10 @@ function deleteLoan(id){
   "Unable to delete loan."
 );
 
-    }
+    })
 
-  );
 
+    .deleteLoan(id);
 
 }
 
@@ -8537,12 +8708,9 @@ function deleteCreditCard(id){
   }
 
 
-  callAppsScript(
-    "deleteCreditCard",
-    [id]
-  )
+  google.script.run
 
-  .then(function(response){
+    .withSuccessHandler(function(response){
 
       console.log(
         "DELETE CREDIT CARD RESPONSE:",
@@ -8575,10 +8743,10 @@ function deleteCreditCard(id){
 
       }
 
-    }
+    })
 
-  )
-  .catch(function(error){
+
+    .withFailureHandler(function(error){
 
       console.error(
         "DELETE CREDIT CARD FAILED:",
@@ -8590,10 +8758,10 @@ function deleteCreditCard(id){
   "Unable to delete credit card."
 );
 
-    }
+    })
 
-  );
 
+    .deleteCreditCard(id);
 
 }
 
@@ -8610,12 +8778,9 @@ function performCreditCardDelete(id){
   );
 
 
-  callAppsScript(
-    "deleteCreditCard",
-    [id]
-  )
+  google.script.run
 
-  .then(function(response){
+    .withSuccessHandler(function(response){
 
       console.log(
         "DELETE CREDIT CARD RESPONSE:",
@@ -8647,10 +8812,10 @@ function performCreditCardDelete(id){
 
       }
 
-    }
+    })
 
-  )
-  .catch(function(error){
+
+    .withFailureHandler(function(error){
 
       console.error(
         "DELETE CREDIT CARD FAILED:",
@@ -8662,10 +8827,10 @@ function performCreditCardDelete(id){
         "Unable to delete credit card."
       );
 
-    }
+    })
 
-  );
 
+    .deleteCreditCard(id);
 
 }
 
@@ -8691,12 +8856,9 @@ function goBackDashboard(){
 function editCreditCard(id){
 
 
-  callAppsScript(
-    "getCreditCards",
-    []
-  )
+  google.script.run
 
-  .then(function(cards){
+    .withSuccessHandler(function(cards){
 
 
       const card =
@@ -8765,12 +8927,64 @@ function editCreditCard(id){
         "flex";
 
 
-    }
+    })
 
-  );
 
+    .getCreditCards();
 
 
 }
 
+function testLoginAPI(){
+
+  fetch(APPS_SCRIPT_URL, {
+
+    method:"POST",
+
+    headers:{
+      "Content-Type":"application/json"
+    },
+
+    body:JSON.stringify({
+
+      action:"loginUser",
+
+      data:{
+        args:[
+          "trexiaamable@gmail.com"
+        ]
+      }
+
+    })
+
+  })
+
+  .then(function(response){
+
+    alert(
+      "STATUS: " + response.status
+    );
+
+    return response.text();
+
+  })
+
+  .then(function(text){
+
+    alert(text);
+
+  })
+
+  .catch(function(error){
+
+    alert(
+      "ERROR: " + error.message
+    );
+
+  });
+
+}
+
+
+testLoginAPI();
 

@@ -105,7 +105,7 @@ body.mobile-device .sidebar {
   width: 100% !important;
   min-height: auto !important;
   height: auto !important;
-  position: relative !important;
+  position: fixed !important;
   top: auto !important;
   border-right: none !important;
   border-bottom: 1px solid var(--pouch-border) !important;
@@ -946,8 +946,7 @@ body.mobile-device .networth-card {
 
 .positive {
 
-  color: var(--pouch-green-dark) !important;
-
+  color: #4F8F52 !important;
   font-weight: 800;
 
 }
@@ -955,8 +954,7 @@ body.mobile-device .networth-card {
 
 .negative {
 
-  color: var(--pouch-red) !important;
-
+  color: #D96C8A !important;
   font-weight: 800;
 
 }
@@ -1722,9 +1720,9 @@ select {
     max-width: none !important;
 
     padding:
-      28px
       18px
-      120px !important;
+      14px
+      90px !important;
   }
 
 
@@ -1747,7 +1745,7 @@ select {
   .page-header h1 {
     margin: 0 !important;
 
-    font-size: 32px !important;
+    font-size: 26px !important;
     line-height: 1.15 !important;
 
     letter-spacing: -.8px !important;
@@ -1807,11 +1805,11 @@ select {
 
   .action-btn,
   .pdax-action-btn {
-    min-height: 52px !important;
+    min-height: 44px !important;
 
     padding:
-      13px
-      19px !important;
+      10px
+      14px !important;
 
     border-radius: 15px !important;
 
@@ -1828,8 +1826,8 @@ select {
     width: 100% !important;
 
     padding:
-      30px
-      25px !important;
+      20px
+      16px !important;
 
     margin-bottom: 26px !important;
 
@@ -1844,7 +1842,7 @@ select {
 
   .networth-card p,
   #netWorth {
-    font-size: 48px !important;
+    font-size: 34px !important;
 
     line-height: 1.05 !important;
 
@@ -1881,10 +1879,10 @@ select {
   .summary-card {
     width: 100% !important;
 
-    min-height: 145px !important;
+    min-height: 110px !important;
 
     padding:
-      23px !important;
+      16px !important;
 
     border-radius: 21px !important;
   }
@@ -1898,7 +1896,7 @@ select {
   }
 
   .summary-card p {
-    font-size: 28px !important;
+    font-size: 20px !important;
 
     line-height: 1.15 !important;
 
@@ -2039,7 +2037,7 @@ select {
   textarea {
     width: 100% !important;
 
-    min-height: 52px !important;
+    min-height: 44px !important;
 
     font-size: 17px !important;
 
@@ -2371,7 +2369,7 @@ select {
 @media screen and (max-width: 1100px) {
 
   body {
-    zoom: 1.25 !important;
+    zoom: 1 !important;
   }
 
 }
@@ -4423,3 +4421,684 @@ button[onclick*="Delete"] {
 
 }
 </style>
+.claim-bond-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.claim-bond-icon {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+  display: inline-block;
+}
+
+
+.claim-bond-btn img.claim-bond-icon {
+  width: 24px !important;
+  height: 24px !important;
+  max-width: 24px !important;
+  max-height: 24px !important;
+  object-fit: contain;
+}
+
+.claim-bond-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+
+button.claim-bond-btn img.claim-bond-icon {
+  width: 28px !important;
+  height: 28px !important;
+  max-width: 28px !important;
+  max-height: 28px !important;
+  min-width: 28px !important;
+  min-height: 28px !important;
+  object-fit: contain !important;
+}
+
+button.claim-bond-btn {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+}
+
+
+/* FORCE CLAIM BOND ICON SIZE */
+button.claim-bond-btn > img.claim-bond-icon {
+  width: 32px !important;
+  height: 32px !important;
+  max-width: 32px !important;
+  max-height: 32px !important;
+  min-width: 32px !important;
+  min-height: 32px !important;
+  object-fit: contain !important;
+  object-position: center !important;
+  flex: 0 0 32px !important;
+}
+
+button.claim-bond-btn {
+  width: auto !important;
+  height: auto !important;
+  min-height: 40px !important;
+  display: inline-flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+}
+
+
+.transaction-loading-icon {
+  width: 40px !important;
+  height: 40px !important;
+  max-width: 40px !important;
+  max-height: 40px !important;
+  object-fit: contain !important;
+  display: inline-block;
+}
+
+
+
+/* =========================
+   DELETE ICON OVERRIDE
+========================= */
+
+.delete-icon {
+  width: 18px !important;
+  height: 18px !important;
+  max-width: 18px !important;
+  max-height: 18px !important;
+  min-width: 18px !important;
+  min-height: 18px !important;
+  object-fit: contain !important;
+  display: inline-block !important;
+  vertical-align: middle !important;
+}
+
+
+button .delete-icon {
+  width: 18px !important;
+  height: 18px !important;
+}
+
+
+
+
+/* =====================================================
+   MOBILE BOTTOM NAVIGATION
+   ===================================================== */
+
+
+.mobile-bottom-nav {
+  display:none;
+}
+
+
+@media screen and (max-width:600px){
+
+  .sidebar {
+    display:none !important;
+  }
+
+
+  .mobile-bottom-nav {
+
+    position:fixed;
+
+    bottom:0;
+    left:0;
+
+    width:100%;
+
+    height:70px;
+
+    background:white;
+
+    display:flex;
+
+    justify-content:space-around;
+
+    align-items:center;
+
+    border-top:1px solid #ddd;
+
+    z-index:9999;
+
+  }
+
+
+  .mobile-bottom-nav button {
+
+    background:none;
+
+    border:none;
+
+    font-size:12px;
+
+    display:flex;
+
+    flex-direction:column;
+
+    align-items:center;
+
+    gap:3px;
+
+  }
+
+
+  .content {
+
+    padding-bottom:90px !important;
+
+  }
+
+}
+
+
+
+
+
+/* REMOVE MOBILE BOTTOM NAV */
+
+.mobile-bottom-nav {
+    display:none !important;
+}
+
+
+
+/* =====================================
+   MOBILE BOTTOM SIDEBAR - FINAL LAYOUT
+   ===================================== */
+
+@media screen and (max-width:600px){
+
+  aside.sidebar {
+
+    flex-direction: row !important;
+
+    height: 75px !important;
+
+    min-height:75px !important;
+
+    padding: 5px 10px !important;
+
+  }
+
+
+  aside.sidebar > .sidebar-menu {
+
+    display:grid !important;
+
+    grid-template-columns:repeat(4,1fr) !important;
+
+    width:100% !important;
+
+  }
+
+
+  aside.sidebar .sidebar-menu button {
+
+    flex-direction:column !important;
+
+    height:65px !important;
+
+    justify-content:center !important;
+
+  }
+
+
+}
+
+
+
+/* =====================================
+   MOVE REAL SIDEBAR TO MOBILE BOTTOM
+   ===================================== */
+
+@media screen and (max-width:600px){
+
+  aside.sidebar {
+
+    display:flex !important;
+
+    position:fixed !important;
+
+    left:0 !important;
+    right:0 !important;
+
+    bottom:0 !important;
+    top:auto !important;
+
+    width:100% !important;
+
+    height:75px !important;
+
+    flex-direction:row !important;
+
+    z-index:999999 !important;
+
+  }
+
+
+  aside.sidebar > .sidebar-menu {
+
+    display:grid !important;
+
+    grid-template-columns:repeat(4,1fr) !important;
+
+    width:100% !important;
+
+    height:100% !important;
+
+  }
+
+
+  aside.sidebar .sidebar-menu button {
+
+    display:flex !important;
+
+    flex-direction:column !important;
+
+    align-items:center !important;
+
+    justify-content:center !important;
+
+  }
+
+
+  .content {
+
+    padding-bottom:90px !important;
+
+  }
+
+}
+
+
+
+/* =====================================
+   FINAL MOBILE SIDEBAR POSITION FIX
+   ===================================== */
+
+@media screen and (max-width:600px){
+
+  aside.sidebar {
+
+    display:flex !important;
+
+    position:fixed !important;
+
+    top:auto !important;
+    bottom:0 !important;
+
+    left:0 !important;
+    right:0 !important;
+
+    width:100% !important;
+
+    height:80px !important;
+    min-height:80px !important;
+
+    flex-direction:row !important;
+
+    padding:5px !important;
+
+    margin:0 !important;
+
+    z-index:9999999 !important;
+
+  }
+
+
+  aside.sidebar > .brand,
+  aside.sidebar > .pdax-sidebar-footer {
+
+    display:none !important;
+
+  }
+
+
+  aside.sidebar > .sidebar-menu {
+
+    display:flex !important;
+
+    flex-direction:row !important;
+
+    justify-content:space-around !important;
+
+    align-items:center !important;
+
+    width:100% !important;
+
+    height:100% !important;
+
+  }
+
+
+  aside.sidebar .sidebar-menu button {
+
+    display:flex !important;
+
+    flex-direction:column !important;
+
+    justify-content:center !important;
+
+    align-items:center !important;
+
+    width:25% !important;
+
+    height:70px !important;
+
+  }
+
+
+  .content {
+
+    padding-bottom:100px !important;
+
+  }
+
+}
+
+
+
+/* HIDE SIDEBAR DURING LOGIN */
+
+#loginScreen:not([style*="display: none"]) ~ .sidebar,
+#loginScreen:not([style*="display: none"]) + .sidebar {
+
+    display:none !important;
+
+}
+
+
+/* MOBILE SIDEBAR ONLY AFTER LOGIN */
+
+body:has(#loginScreen:not([style*="display: none"])) aside.sidebar {
+
+    display:none !important;
+
+}
+
+
+
+/* MOBILE: MOVE EXISTING SIDEBAR TO BOTTOM */
+
+@media screen and (max-width:600px){
+
+  .sidebar {
+
+    position: fixed !important;
+
+    left: 0 !important;
+    right: 0 !important;
+
+    bottom: 0 !important;
+    top: auto !important;
+
+    width: 100% !important;
+    height: 86px !important;
+
+    min-height: 86px !important;
+
+    z-index: 999999 !important;
+
+  }
+
+
+  .sidebar-menu {
+
+    display: flex !important;
+
+    flex-direction: row !important;
+
+    justify-content: space-around !important;
+
+    width:100% !important;
+
+  }
+
+
+  .content {
+
+    padding-bottom: 100px !important;
+
+  }
+
+}
+
+
+
+/* FIX MOBILE SIDEBAR TO BOTTOM NAV */
+@media screen and (max-width: 1100px) {
+
+  body.mobile-device .sidebar,
+  aside.sidebar {
+    position: fixed !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    top: auto !important;
+
+    width: 100% !important;
+    height: 86px !important;
+    min-height: 86px !important;
+
+    border-right: none !important;
+    border-top: 1px solid var(--pouch-border) !important;
+
+    background: #FFFFFF !important;
+    z-index: 999999 !important;
+  }
+
+}
+
+
+/* MOBILE NUMBER SIZE FIX */
+@media screen and (max-width: 1100px) {
+
+  .networth-card p,
+  #netWorth {
+    font-size: 28px !important;
+    line-height: 1.1 !important;
+    word-break: break-word !important;
+  }
+
+
+  .summary-card p {
+    font-size: 17px !important;
+    line-height: 1.2 !important;
+    word-break: break-word !important;
+  }
+
+
+  .asset-item p,
+  .asset-card p {
+    font-size: 15px !important;
+  }
+
+}
+
+
+/* =====================================================
+   MOBILE PROPORTIONAL SCALE FIX
+   ===================================================== */
+
+@media screen and (max-width: 1100px) {
+
+  body {
+    font-size: 15px !important;
+    line-height: 1.35 !important;
+  }
+
+
+  /* PAGE TITLES */
+  .page-header h1 {
+    font-size: 22px !important;
+    line-height: 1.15 !important;
+  }
+
+
+  /* SECTION TITLES */
+  .content h2,
+  #dashboardPage > h2,
+  section > h2 {
+    font-size: 18px !important;
+    margin: 22px 0 12px !important;
+  }
+
+
+  h3,
+  .asset-card h2 {
+    font-size: 16px !important;
+  }
+
+
+  /* NORMAL TEXT */
+  p,
+  span,
+  label,
+  small {
+    font-size: 14px !important;
+  }
+
+
+  /* NET WORTH */
+  .networth-card {
+    padding: 18px 15px !important;
+  }
+
+  .networth-card h2 {
+    font-size: 13px !important;
+  }
+
+  .networth-card p,
+  #netWorth {
+    font-size: 28px !important;
+    line-height: 1.05 !important;
+  }
+
+
+  /* SUMMARY CARDS */
+  .summary-card {
+    padding: 14px !important;
+    min-height: 95px !important;
+  }
+
+  .summary-card h3 {
+    font-size: 13px !important;
+  }
+
+  .summary-card p {
+    font-size: 18px !important;
+  }
+
+  .summary-card small {
+    font-size: 11px !important;
+  }
+
+
+  /* BUTTONS */
+  button,
+  .action-btn,
+  .pdax-action-btn {
+    min-height: 38px !important;
+    padding: 8px 12px !important;
+    font-size: 13px !important;
+    border-radius: 12px !important;
+  }
+
+
+  /* INPUTS */
+  input,
+  select,
+  textarea {
+    min-height: 40px !important;
+    padding: 9px 11px !important;
+    font-size: 14px !important;
+  }
+
+
+  /* CARDS */
+  .asset-card,
+  .card {
+    padding: 16px !important;
+    border-radius: 16px !important;
+  }
+
+
+  .asset-item {
+    padding: 12px !important;
+  }
+
+
+  .asset-item h3 {
+    font-size: 15px !important;
+  }
+
+
+  .asset-item p {
+    font-size: 13px !important;
+  }
+
+
+  /* TABLES */
+  table {
+    font-size: 13px !important;
+  }
+
+  th,
+  td {
+    padding: 10px !important;
+    font-size: 12px !important;
+  }
+
+
+  /* BOTTOM NAV */
+  aside.sidebar .sidebar-menu button {
+    font-size: 11px !important;
+  }
+
+  aside.sidebar .sidebar-menu button svg {
+    width: 22px !important;
+    height: 22px !important;
+  }
+
+}
+
+
+/* VERY SMALL PHONES */
+@media screen and (max-width: 400px) {
+
+  .page-header h1 {
+    font-size: 20px !important;
+  }
+
+  .networth-card p,
+  #netWorth {
+    font-size: 24px !important;
+  }
+
+  .summary-card p {
+    font-size: 16px !important;
+  }
+
+}
+
+
+
+/* CLAIM BOND ALWAYS GREEN */
+.claim-bond-btn,
+.claim-bond-btn:hover,
+.claim-bond-btn:focus,
+.claim-bond-btn:active {
+  background: #A8DFA0 !important;
+  color: #26352A !important;
+}

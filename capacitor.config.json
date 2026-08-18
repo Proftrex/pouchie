@@ -1,9 +1,5 @@
 {
   "appId": "com.pouchie.app",
-  "appName": "pouchie",
-  "webDir": "www",
-  "server": {
-    "url": "https://script.google.com/macros/s/AKfycbzbmKO_zgVRGpiqu6A1MRt7DVkNYxERycmj4HNBbreWpy2p8RjzxId0vGh2SGV9Ma56/exec",
-    "cleartext": true
-  }
+  "appName": "Pouchie",
+  "webDir": "www"
 }
