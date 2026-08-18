@@ -4,7 +4,7 @@
 
 
 const APPS_SCRIPT_URL =
-"https://script.google.com/macros/s/AKfycbwpNgBltywiSczQa6GjJ-63kVuFofjKmIAqH1-kgSS2d6Y_m0CLyvcvHkRtYaSRZtS-/exec";
+"https://script.google.com/macros/s/AKfycbz7SOxgW0fnxVB9d7jYn57RAYjOdmTOmVRir7WgMONDRkGfz450VMgi9JRSnWfQa3Df9Q/exec";
 
 
 function callAppsScript(action,args=[]){
@@ -5704,6 +5704,100 @@ function confirmClaimAction(){
 }
 
 
+
+
+function registerUser(){
+
+  const email =
+    document
+      .getElementById("loginEmail")
+      .value
+      .trim();
+
+
+  const password =
+    document
+      .getElementById("loginPassword")
+      .value
+      .trim();
+
+
+  if(!email || !password){
+
+    document
+      .getElementById("loginMessage")
+      .innerHTML =
+      "Please enter email and password.";
+
+    return;
+
+  }
+
+
+  showTransactionLoading(
+    "Creating account..."
+  );
+
+
+  callAppsScript(
+    "registerUser",
+    [
+      email,
+      password
+    ]
+  )
+
+  .then(function(result){
+
+    console.log(
+      "REGISTER RESPONSE:",
+      result
+    );
+
+
+    if(result.success){
+
+      document
+        .getElementById("loginMessage")
+        .innerHTML =
+        "Account created. Logging in...";
+
+
+      loginUser();
+
+    }
+
+    else{
+
+      document
+        .getElementById("loginMessage")
+        .innerHTML =
+        result.message;
+
+    }
+
+
+  })
+
+  .catch(function(error){
+
+    console.error(
+      "REGISTER ERROR:",
+      error
+    );
+
+
+    document
+      .getElementById("loginMessage")
+      .innerHTML =
+      "Unable to create account.";
+
+  });
+
+
+}
+
+
 function loginUser(){
 
   const loginButton = document.getElementById("loginButton");
@@ -5716,6 +5810,12 @@ function loginUser(){
   const email =
     document
       .getElementById("loginEmail")
+      .value
+      .trim();
+
+  const password =
+    document
+      .getElementById("loginPassword")
       .value
       .trim();
 
@@ -5740,7 +5840,8 @@ function loginUser(){
   callAppsScript(
     "loginUser",
     [
-      email
+      email,
+      password
     ]
   )
 
@@ -5793,7 +5894,7 @@ function loginUser(){
       document
         .getElementById("loginMessage")
         .innerHTML =
-         "Access request received. Please come back within 72 hours to gain access of the app.";
+         "Email and Password do not match. Make sure you are using the correct login details.";
 
 
     }
@@ -8773,4 +8874,253 @@ function editCreditCard(id){
 
 }
 
+
+
+
+function showForgotPassword(){
+
+  document
+  .getElementById("loginScreen")
+  .style.display = "none";
+
+
+  document
+  .getElementById("forgotPasswordBox")
+  .style.display = "flex";
+
+}
+
+
+
+function requestPasswordReset(){
+
+  const email =
+    document
+    .getElementById("resetEmail")
+    .value
+    .trim();
+
+
+  const button =
+    document.querySelector(
+      "#forgotPasswordBox button"
+    );
+
+
+  if(button){
+
+    button.innerHTML =
+      "Sending code to your email...";
+
+    button.disabled = true;
+
+  }
+
+
+
+  callAppsScript(
+    "requestPasswordReset",
+    [
+      email
+    ]
+  )
+
+  .then(function(result){
+
+    document
+    .getElementById("resetMessage")
+    .innerHTML =
+    result.message;
+
+
+
+    if(button){
+
+      button.innerHTML =
+        "Send Reset Code";
+
+      button.disabled = false;
+
+    }
+
+  })
+
+
+  .catch(function(error){
+
+
+    console.error(
+      "RESET ERROR:",
+      error
+    );
+
+
+    document
+    .getElementById("resetMessage")
+    .innerHTML =
+    "Unable to send reset code.";
+
+
+
+    if(button){
+
+      button.innerHTML =
+        "Send Reset Code";
+
+      button.disabled = false;
+
+    }
+
+
+  });
+
+
+}
+
+
+
+
+function resetPassword(){
+
+  const email =
+    document
+    .getElementById("resetEmail")
+    .value
+    .trim();
+
+
+  const code =
+    document
+    .getElementById("resetCode")
+    .value
+    .trim();
+
+
+  const password =
+    document
+    .getElementById("newPassword")
+    .value
+    .trim();
+
+
+  const button =
+    document.querySelector(
+      "#forgotPasswordBox button:nth-of-type(2)"
+    );
+
+
+  if(button){
+
+    button.innerHTML =
+      "Password is being reset...";
+
+    button.disabled = true;
+
+  }
+
+
+
+  callAppsScript(
+    "resetPassword",
+    [
+      email,
+      code,
+      password
+    ]
+  )
+
+  .then(function(result){
+
+
+    document
+    .getElementById("resetMessage")
+    .innerHTML =
+    result.message;
+
+
+
+    if(button){
+
+      button.innerHTML =
+        "Change Password";
+
+      button.disabled = false;
+
+    }
+
+
+  })
+
+
+  .catch(function(error){
+
+
+    console.error(
+      "RESET PASSWORD ERROR:",
+      error
+    );
+
+
+    document
+    .getElementById("resetMessage")
+    .innerHTML =
+    "Unable to reset password.";
+
+
+
+    if(button){
+
+      button.innerHTML =
+        "Change Password";
+
+      button.disabled = false;
+
+    }
+
+
+  });
+
+
+}
+
+
+
+
+function backToLogin(){
+
+  document
+  .getElementById("forgotPasswordBox")
+  .style.display = "none";
+
+
+  document
+  .getElementById("loginScreen")
+  .style.display = "flex";
+
+}
+
+
+
+function togglePassword(id, icon){
+
+  const input =
+    document.getElementById(id);
+
+
+  if(input.type === "password"){
+
+    input.type = "text";
+
+    icon.src = "assets/Close.png";
+
+  }
+  else{
+
+    input.type = "password";
+
+    icon.src = "assets/Open.png";
+
+  }
+
+}
 

@@ -5102,3 +5102,57 @@ body:has(#loginScreen:not([style*="display: none"])) aside.sidebar {
   background: #A8DFA0 !important;
   color: #26352A !important;
 }
+
+
+#forgotPasswordBox {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+}
+
+
+
+.forgot-password-text {
+  text-align: center;
+  margin-top: 15px;
+  font-size: 14px;
+  color: #666;
+}
+
+
+.forgot-password-text span {
+  color: #4f7d55;
+  text-decoration: underline;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+
+
+/* Password visibility icon fix */
+
+.password-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+
+.password-wrapper input {
+  width: 100%;
+  padding-right: 45px;
+}
+
+
+.password-toggle {
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 20px !important;
+  height: 20px !important;
+  object-fit: contain;
+  cursor: pointer;
+  z-index: 5;
+}
+

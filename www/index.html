@@ -40,11 +40,102 @@
       placeholder="Email address"
     >
 
+    <div class="password-wrapper">
+
+      <input
+        id="loginPassword"
+        type="password"
+        placeholder="Password"
+      >
+
+      <img
+        src="assets/Open.png"
+        class="password-toggle"
+        onclick="togglePassword('loginPassword', this)"
+      >
+
+    </div>
+
     <button id="loginButton" onclick="loginUser()">
       Enter Pouch
     </button>
 
+
+<p class="forgot-password-text">
+  Forgot password?
+  <span onclick="showForgotPassword()">
+    Reset now.
+  </span>
+</p>
+
     <p id="loginMessage"></p>
+
+  </div>
+
+</div>
+
+
+
+<!-- =========================================================
+     FORGOT PASSWORD
+========================================================= -->
+
+<div id="forgotPasswordBox" class="login-screen" style="display:none;">
+
+  <div class="login-box">
+
+    <h2>
+      Reset Password
+    </h2>
+
+    <input
+      id="resetEmail"
+      type="email"
+      placeholder="Email address"
+    >
+
+    <button onclick="requestPasswordReset()">
+      Send Reset Code
+    </button>
+
+
+    <input
+      id="resetCode"
+      placeholder="Enter reset code"
+    >
+
+
+    <div class="password-wrapper">
+
+      <input
+        id="newPassword"
+        type="password"
+        placeholder="New password"
+      >
+
+      <img
+        src="assets/Open.png"
+        class="password-toggle"
+        onclick="togglePassword('newPassword', this)"
+      >
+
+    </div>
+
+
+    <button onclick="resetPassword()">
+      Change Password
+    </button>
+
+
+    <p id="resetMessage"></p>
+
+
+    <button
+      onclick="backToLogin()"
+    >
+      Back to Login
+    </button>
+
 
   </div>
 
