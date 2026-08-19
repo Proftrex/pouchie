@@ -63,7 +63,10 @@
 
 <p class="forgot-password-text">
   Forgot password?
-  <span onclick="showForgotPassword()">
+  <span 
+    onclick="showForgotPassword()"
+    class="auth-link"
+  >
     Reset now.
   </span>
 </p>
@@ -130,11 +133,13 @@
     <p id="resetMessage"></p>
 
 
-    <button
+    <a
+      href="javascript:void(0)"
       onclick="backToLogin()"
+      class="back-login-link"
     >
       Back to Login
-    </button>
+    </a>
 
 
   </div>
@@ -264,7 +269,7 @@
 
 
       <a
-        href="https://www.facebook.com/groups/PDAXCommunity"
+        href="mailto:pouchappsupport@gmail.com?subject=Pouch%20App%20Support"
         target="_blank"
         rel="noopener"
       >
@@ -687,6 +692,66 @@
   ></div>
 
 
+  <h2>
+    Credit Card Payments
+  </h2>
+
+
+  <button
+    class="action-btn"
+    onclick="openCreditCardPaymentModal()"
+  >
+    + Add Payment
+  </button>
+
+
+  <table id="creditCardPaymentsTable">
+
+    <thead>
+
+      <tr>
+
+        <th>
+          Date
+        </th>
+
+        <th>
+          Card
+        </th>
+
+        <th>
+          Amount
+        </th>
+
+        <th>
+          Description
+        </th>
+
+      </tr>
+
+    </thead>
+
+
+    <tbody>
+
+      <tr>
+        <td colspan="4">
+          No payments yet
+        </td>
+      </tr>
+
+    </tbody>
+
+
+  </table>
+
+
+
+
+
+  
+
+
 </section>
 
 
@@ -799,6 +864,38 @@
     id="loanCards"
     class="asset-grid"
   ></div>
+
+
+  <h2>
+    Loan Payments
+  </h2>
+
+
+  <button
+    class="action-btn"
+    onclick="openLoanPaymentModal()"
+  >
+    + Add Payment
+  </button>
+
+
+  <table id="loanTransactionsTable">
+
+    <thead>
+
+      <tr>
+        <th>Date</th>
+        <th>Loan</th>
+        <th>Amount</th>
+        <th>Description</th>
+      </tr>
+
+    </thead>
+
+
+    <tbody></tbody>
+
+  </table>
 
 
 </section>
@@ -3351,6 +3448,139 @@
 <!-- =========================================================
      TRANSACTION NOTIFICATION
 ========================================================= -->
+
+
+<!-- =========================
+     CREDIT CARD TRANSACTION MODAL
+========================= -->
+
+<div
+  id="creditCardPaymentModal"
+  class="modal"
+>
+
+  <div class="modal-box">
+
+    <h2>
+      Add Credit Card Payment
+    </h2>
+
+
+    <label>
+      Credit Card
+    </label>
+
+    <select id="creditCardPaymentCard">
+    </select>
+
+
+    <label>
+      Amount
+    </label>
+
+    <input
+      type="number"
+      id="creditCardPaymentAmount"
+      placeholder="0.00"
+    >
+
+
+    <label>
+      Description
+    </label>
+
+    <input
+      type="text"
+      id="creditCardPaymentDescription"
+      placeholder="Optional"
+    >
+
+
+    <div class="modal-actions">
+
+      <button onclick="closeCreditCardPaymentModal()">
+        Cancel
+      </button>
+
+
+      <button onclick="saveCreditCardPayment()">
+        Save
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+
+
+<!-- =========================
+     LOAN PAYMENT MODAL
+========================= -->
+
+<div
+  id="loanPaymentModal"
+  class="modal"
+>
+
+  <div class="modal-box">
+
+    <h2>
+      Add Loan Payment
+    </h2>
+
+
+    <label>
+      Loan
+    </label>
+
+    <select id="loanPaymentLoan">
+    </select>
+
+
+    <label>
+      Amount Paid
+    </label>
+
+    <input
+      type="number"
+      id="loanPaymentAmount"
+      placeholder="0.00"
+    >
+
+
+    <label>
+      Description
+    </label>
+
+    <input
+      type="text"
+      id="loanPaymentDescription"
+      placeholder="Monthly payment"
+    >
+
+
+    <div class="modal-actions">
+
+      <button onclick="closeLoanTransactionModal()">
+        Cancel
+      </button>
+
+
+      <button onclick="saveLoanPayment()">
+        Save
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+
 
 <div
   id="transactionModal"
