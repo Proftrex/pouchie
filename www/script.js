@@ -9,6 +9,8 @@ const APPS_SCRIPT_URL =
 
 function callAppsScript(action,args=[]){
 
+  const startTime = performance.now();
+
   console.log("SENDING ACTION:", action);
 
   return fetch(
@@ -68,6 +70,12 @@ function callAppsScript(action,args=[]){
 
       }
 
+
+      console.log(
+        action + " completed in ",
+        Math.round(performance.now() - startTime),
+        "ms"
+      );
 
       return data;
 
@@ -411,6 +419,7 @@ function showPage(page, saveHistory = true) {
       creditCards.style.display = "block";
 
     loadCreditCards();
+    loadCreditCardPayments();
 
   }
 
@@ -425,6 +434,7 @@ function showPage(page, saveHistory = true) {
       loans.style.display = "block";
 
     loadLoans();
+    loadLoanPayments();
 
   }
 
@@ -1359,6 +1369,8 @@ function deleteTransaction(id, type){
 
 function loadDashboard() {
 
+  showDashboardLoading();
+
   callAppsScript(
     "getDashboard",
     []
@@ -1372,8 +1384,12 @@ function loadDashboard() {
 
     console.log(
       "FULL DATA:",
-      data
+      JSON.stringify(data, null, 2)
     );
+
+    console.log("SAVINGS:", data?.assets?.savings);
+    console.log("CRYPTO:", data?.assets?.cryptocurrencies);
+    console.log("PORTFOLIO:", data?.portfolio);
 
 
 
@@ -1755,6 +1771,29 @@ function loadCryptoSummary(){
 
 
 
+
+/* =========================
+   DASHBOARD LOADING STATE
+========================= */
+
+function showDashboardLoading(){
+
+  const netWorth =
+    document.getElementById("netWorth");
+
+
+  if(netWorth){
+
+    netWorth.textContent =
+      "Dashboard is loading...";
+
+  }
+
+}
+
+
+
+
 /* =========================
    RENDER MAIN DASHBOARD
 ========================= */
@@ -1881,35 +1920,19 @@ function renderDashboard(data) {
   const values = {
 
     dashboardCryptocurrencies:
-      (data.categories?.Cryptocurrencies || [])
-        .reduce(
-          (sum,item)=>sum + Number(item.currentValue || 0),
-          0
-        ),
+      Number(data.assets?.cryptocurrencies) || 0,
 
     dashboardBonds:
-      (data.categories?.Bonds || [])
-        .reduce(
-          (sum,item)=>sum + Number(item.currentValue || item.amount || 0),
-          0
-        ),
+      Number(data.assets?.bonds) || 0,
 
     dashboardCommodities:
-      (data.categories?.Commodities || [])
-        .reduce(
-          (sum,item)=>sum + Number(item.currentValue || 0),
-          0
-        ),
+      Number(data.assets?.commodities) || 0,
 
     dashboardStocks:
-      (data.categories?.Stocks || [])
-        .reduce(
-          (sum,item)=>sum + Number(item.currentValue || 0),
-          0
-        ),
+      Number(data.assets?.stocks) || 0,
 
     dashboardSavings:
-      data.categories?.Savings || 0
+      Number(data.assets?.savings) || 0
 
   };
 
@@ -2841,6 +2864,10 @@ function submitSavings(){
 
 
 
+  // CLOSE INPUT MODAL FIRST
+  closeSavingsModal();
+
+
   // SHOW LOADING MODAL
   showTransactionLoading("Saving savings...");
 
@@ -2883,9 +2910,7 @@ function submitSavings(){
 
 
 
-    closeSavingsModal();
-
-
+    
     loadSavings();
 
     loadDashboard();
@@ -2998,6 +3023,10 @@ function submitWithdrawal(){
 
 
 
+  // CLOSE INPUT MODAL FIRST
+  closeWithdrawalModal();
+
+
   // SHOW LOADING MODAL
   showTransactionLoading("Saving withdrawal...");
 
@@ -3045,9 +3074,7 @@ function submitWithdrawal(){
 
 
 
-    closeWithdrawalModal();
-
-
+    
     loadSavings();
 
     loadDashboard();
@@ -3133,9 +3160,12 @@ function submitCrypto(){
 
 
 
+  // CLOSE INPUT MODAL FIRST
+  closeCryptoModal();
+
+
   // SHOW LOADING MODAL
   showTransactionLoading("Saving transaction...");
-
 
 
   callAppsScript(
@@ -3171,9 +3201,6 @@ function submitCrypto(){
     // SHOW SUCCESS MODAL
     showTransactionSuccess();
 
-
-
-    closeCryptoModal();
 
 
     loadCryptocurrenciesDashboard();
@@ -3279,6 +3306,10 @@ function submitCommodity(){
 
 
 
+  // CLOSE INPUT MODAL FIRST
+  closeCommodityModal();
+
+
   // SHOW LOADING MODAL
 
   showTransactionLoading("Saving commodity...");
@@ -3328,9 +3359,7 @@ function submitCommodity(){
 
 
 
-    closeCommodityModal();
-
-
+    
 
     loadCommodities();
 
@@ -3431,6 +3460,10 @@ function submitStock(){
 
 
 
+  // CLOSE INPUT MODAL FIRST
+  closeStockModal();
+
+
   // SHOW LOADING MODAL
 
   showTransactionLoading("Saving stock...");
@@ -3480,9 +3513,7 @@ function submitStock(){
 
 
 
-    closeStockModal();
-
-
+    
 
     try {
       loadStocks();
@@ -4019,6 +4050,10 @@ function submitBond(){
 
 
 
+  // CLOSE INPUT MODAL FIRST
+  closeBondModal();
+
+
   // SHOW LOADING CARD
 
   showTransactionLoading("Saving bond...");
@@ -4068,9 +4103,7 @@ function submitBond(){
 
 
 
-    closeBondModal();
-
-
+    
     clearBondForm();
 
 
@@ -5393,26 +5426,78 @@ function loadStockTransactions(){
 
 function showTransactionLoading(text = "Loading transaction..."){
 
-  const modal =
-    document.getElementById("transactionModal");
-
-  const icon =
-    document.getElementById("transactionIcon");
-
-  const message =
-    document.getElementById("transactionMessage");
-
 
   /*
-   * REMOVE DELETE / CANCEL BUTTONS
-   *
-   * This is important because the same
-   * transactionModal is also used for
-   * delete confirmations.
+   * FORCE CLOSE ALL INPUT MODALS
    */
 
+  const modals = [
+
+    "personalIncomeModal",
+
+    "businessIncomeModal",
+
+    "loanModal",
+
+    "transactionInputModal"
+
+  ];
+
+
+  modals.forEach(function(id){
+
+    const modal =
+      document.getElementById(id);
+
+
+    if(modal){
+
+      console.log("HIDING MODAL:", id);
+
+      modal.style.display = "none";
+
+    }
+
+  });
+
+
+
+  const modal =
+    document.getElementById(
+      "transactionModal"
+    );
+
+
+  if(!modal){
+
+    console.error(
+      "transactionModal not found"
+    );
+
+    return;
+
+  }
+
+
+
+  const icon =
+    document.getElementById(
+      "transactionIcon"
+    );
+
+
+  const message =
+    document.getElementById(
+      "transactionMessage"
+    );
+
+
+
   const actions =
-    modal.querySelector(".transaction-actions");
+    modal.querySelector(
+      ".transaction-actions"
+    );
+
 
   if(actions){
 
@@ -5421,19 +5506,19 @@ function showTransactionLoading(text = "Loading transaction..."){
   }
 
 
-  /*
-   * RESET TO NORMAL SAVING STATE
-   */
 
   if(icon){
 
     icon.innerHTML = `
-<img 
-src="https://i.imgur.com/mDFTPEN.png"
-class="transaction-loading-icon">
-`;
+
+      <img
+      src="https://i.imgur.com/mDFTPEN.png"
+      class="transaction-loading-icon">
+
+    `;
 
   }
+
 
 
   if(message){
@@ -5444,10 +5529,13 @@ class="transaction-loading-icon">
   }
 
 
+
   modal.style.display =
     "flex";
 
+
 }
+
 
 /* =========================
    TRANSACTION SUCCESS
@@ -5883,7 +5971,11 @@ function loginUser(){
       }
 
 
-      loadDashboard();
+      setTimeout(function(){
+
+        loadDashboard();
+
+      },100);
 
 
     }
@@ -6305,6 +6397,11 @@ function submitPersonalIncome(){
   }
 
 
+  // CLOSE INPUT MODAL FIRST
+
+  closePersonalIncomeModal();
+
+
   // SHOW LOADING MODAL
 
   showTransactionLoading("Saving personal income...");
@@ -6342,18 +6439,45 @@ function submitPersonalIncome(){
       }
 
 
-      // SUCCESS
+      /*
+       * SUCCESS
+       */
 
-      showTransactionSuccess();
+      showTransactionSuccess(
+        "Personal income saved successfully."
+      );
 
 
-      closePersonalIncomeModal();
+      /*
+       * CLEAR FORM
+       */
+
+      document.getElementById(
+        "personalIncomeDate"
+      ).value = "";
 
 
-      // Refresh the page
+      document.getElementById(
+        "personalIncomeSource"
+      ).value = "";
+
+
+      document.getElementById(
+        "personalIncomeDescription"
+      ).value = "";
+
+
+      document.getElementById(
+        "personalIncomeAmount"
+      ).value = "";
+
+
+
+      /*
+       * REFRESH DATA
+       */
 
       loadPersonalIncome();
-
 
       loadDashboard();
 
@@ -6866,6 +6990,13 @@ function submitBusinessIncome(){
 
 
   /*
+   * CLOSE INPUT MODAL FIRST
+   */
+
+  closeBusinessIncomeModal();
+
+
+  /*
    * SHOW SAVING MESSAGE
    */
 
@@ -6905,13 +7036,6 @@ function submitBusinessIncome(){
         showTransactionSuccess(
           "Business income saved successfully."
         );
-
-
-        /*
-         * Close Business Income modal
-         */
-
-        closeBusinessIncomeModal();
 
 
         /*
@@ -7172,28 +7296,36 @@ function loadCreditCards(){
 
     <p>
   <strong>Balance:</strong>
+  <span class="credit-value">
   ${formatPeso(
     Number(card.balance) || 0
   )}
+  </span>
 </p>
 
 <p>
   <strong>Credit Limit:</strong>
+  <span class="credit-value">
   ${formatPeso(
     Number(card.creditLimit) || 0
   )}
+  </span>
 </p>
 
 <p>
   <strong>Available:</strong>
+  <span class="credit-value">
   ${formatPeso(
     available
   )}
+  </span>
 </p>
 
 <p>
   <strong>Utilization:</strong>
+  <span class="credit-value">
   ${utilization.toFixed(1)}%
+  </span>
 </p>
 
 <br>
@@ -7503,6 +7635,14 @@ function submitCreditCard(){
   // =========================
 
 
+  closeCreditCardModal();
+
+
+  showTransactionLoading(
+    "Saving credit card..."
+  );
+
+
   callAppsScript(
     "saveCreditCard",
     [data]
@@ -7716,21 +7856,27 @@ function loadLoans(){
 
     <p>
       <strong>Outstanding:</strong>
+      <span class="credit-value">
       ${formatPeso(outstanding)}
+      </span>
     </p>
 
 
 
     <p>
       <strong>Original Loan:</strong>
+      <span class="credit-value">
       ${formatPeso(original)}
+      </span>
     </p>
 
 
 
     <p>
       <strong>Paid:</strong>
+      <span class="credit-value">
       ${formatPeso(paid)}
+      </span>
     </p>
 
 
@@ -8079,6 +8225,9 @@ function submitLoan(){
    * SAVING
    */
 
+  closeLoanModal();
+
+
   showTransactionLoading(
     "Saving loan..."
   );
@@ -8168,140 +8317,6 @@ function submitLoan(){
 
     })
 
-
-    if(id){
-
-
-  callAppsScript(
-    "updateLoan",
-    [{
-      id:id,
-      loanName:loanName,
-      loanType:loanType,
-      date:loanDate,
-      originalAmount:originalAmount,
-      outstandingBalance:outstandingBalance
-    }]
-  )
-
-  .then(function(result){
-
-      if(
-        result &&
-        (
-          result.success === true ||
-          result.status === "success" ||
-          result.result === "success"
-        )
-      ){
-
-        showTransactionSuccess(
-          "Loan updated successfully."
-        );
-
-
-        closeLoanModal();
-
-
-        window.editingLoanId = "";
-
-
-        loadLoans();
-
-      }
-      else{
-
-        showTransactionError(
-          result.message
-        );
-
-      }
-
-    })
-
-
-    .catch(function(error){
-
-      console.error(
-        "Loan Update Error:",
-        error
-      );
-
-
-      showTransactionError(
-        "Unable to update loan."
-      );
-
-    })
-
-  ;
-
-
-}
-else{
-
-
-  callAppsScript(
-    "saveLoan",
-    [{
-      loanName:loanName,
-      loanType:loanType,
-      date:loanDate,
-      originalAmount:originalAmount,
-      outstandingBalance:outstandingBalance
-    }]
-  )
-
-  .then(function(result){
-
-      if(
-        result &&
-        (
-          result.success === true ||
-          result.status === "success" ||
-          result.result === "success"
-        )
-      ){
-
-        showTransactionSuccess(
-          "Loan saved successfully."
-        );
-
-
-        closeLoanModal();
-
-
-        loadLoans();
-
-      }
-      else{
-
-        showTransactionError(
-          result.message
-        );
-
-      }
-
-    })
-
-
-    .catch(function(error){
-
-      console.error(
-        "Loan Save Error:",
-        error
-      );
-
-
-      showTransactionError(
-        "Unable to save loan."
-      );
-
-    })
-
-  ;
-
-}
 
 }
 
@@ -8552,6 +8567,11 @@ function deleteLoan(id){
   }
 
 
+  showTransactionLoading(
+    "Deleting loan..."
+  );
+
+
   callAppsScript(
     "deleteLoan",
     [id]
@@ -8636,6 +8656,11 @@ function deleteCreditCard(id){
     return;
 
   }
+
+
+  showTransactionLoading(
+    "Deleting credit card..."
+  );
 
 
   callAppsScript(
@@ -9121,6 +9146,523 @@ function togglePassword(id, icon){
     icon.src = "assets/Open.png";
 
   }
+
+}
+
+
+
+/* =========================
+   CREDIT CARD PAYMENT
+========================= */
+
+
+function openCreditCardPaymentModal(){
+
+  document
+  .getElementById("creditCardPaymentModal")
+  .style.display = "flex";
+
+
+  loadCreditCardPaymentDropdown();
+
+}
+
+
+
+
+function closeCreditCardPaymentModal(){
+
+  document
+  .getElementById("creditCardPaymentModal")
+  .style.display = "none";
+
+}
+
+
+
+
+function loadCreditCardPaymentDropdown(){
+
+  callAppsScript(
+    "getCreditCards",
+    []
+  )
+
+  .then(function(cards){
+
+    const select =
+      document.getElementById(
+        "creditCardPaymentCard"
+      );
+
+
+    if(!select) return;
+
+
+    select.innerHTML = "";
+
+
+    cards.forEach(function(card){
+
+
+      const option =
+        document.createElement("option");
+
+
+      option.value =
+        card.id;
+
+
+      option.textContent =
+        card.cardName +
+        " (₱" +
+        Number(card.balance)
+        .toLocaleString() +
+        ")";
+
+
+      select.appendChild(option);
+
+
+    });
+
+
+  });
+
+}
+
+
+
+
+function saveCreditCardPayment(){
+
+
+  const data = {
+
+
+    cardId:
+      document.getElementById(
+        "creditCardPaymentCard"
+      ).value,
+
+
+    amount:
+      document.getElementById(
+        "creditCardPaymentAmount"
+      ).value,
+
+
+    description:
+      document.getElementById(
+        "creditCardPaymentDescription"
+      ).value
+
+
+  };
+
+
+
+  closeCreditCardPaymentModal();
+
+  showTransactionLoading(
+    "Saving payment..."
+  );
+
+
+
+  callAppsScript(
+    "saveCreditCardPayment",
+    [data]
+  )
+
+  .then(function(result){
+
+    console.log("SAVE CREDIT CARD PAYMENT RESULT:", result);
+
+
+    if(result.success){
+
+
+      showTransactionSuccess(
+        "Payment saved!"
+      );
+
+
+      loadCreditCards();
+      loadCreditCardPayments();
+
+
+    }
+    else{
+
+
+      showTransactionError(
+        result.message
+      );
+
+
+    }
+
+
+  });
+
+
+}
+
+
+
+
+
+/* =========================
+   LOAN PAYMENT
+========================= */
+
+
+function openLoanPaymentModal(){
+
+  document
+    .getElementById("loanPaymentModal")
+    .style.display = "flex";
+
+
+  loadLoanPaymentDropdown();
+
+}
+
+
+
+function closeLoanPaymentModal(){
+
+  document
+    .getElementById("loanPaymentModal")
+    .style.display = "none";
+
+}
+
+
+
+function loadLoanPaymentDropdown(){
+
+  callAppsScript(
+    "getLoans",
+    []
+  )
+
+  .then(function(loans){
+
+    const select =
+      document.getElementById(
+        "loanPaymentLoan"
+      );
+
+
+    if(!select) return;
+
+
+    select.innerHTML = "";
+
+
+    loans.forEach(function(loan){
+
+      const option =
+        document.createElement("option");
+
+
+      option.value =
+        loan.id;
+
+
+      option.textContent =
+        loan.loanName +
+        " - ₱" +
+        Number(
+          loan.outstandingBalance
+        ).toLocaleString();
+
+
+      select.appendChild(option);
+
+    });
+
+  });
+
+}
+
+
+
+
+function saveLoanPayment(){
+
+  console.log("SAVE LOAN PAYMENT CLICKED");
+
+  const data = {
+
+    loanId:
+      document.getElementById(
+        "loanPaymentLoan"
+      ).value,
+
+
+    amount:
+      document.getElementById(
+        "loanPaymentAmount"
+      ).value,
+
+
+    description:
+      document.getElementById(
+        "loanPaymentDescription"
+      ).value
+
+  };
+
+
+  closeLoanPaymentModal();
+
+  showTransactionLoading(
+    "Saving payment..."
+  );
+
+
+  callAppsScript(
+    "saveLoanPayment",
+    [data]
+  )
+
+  .then(function(result){
+
+    console.log("SAVE CREDIT CARD PAYMENT RESULT:", result);
+
+
+    if(result.success){
+
+
+      showTransactionSuccess(
+        "Payment saved!"
+      );
+
+
+      loadLoans();
+      loadLoanPayments();
+
+
+    }
+    else{
+
+
+      showTransactionError(
+        result.message
+      );
+
+
+    }
+
+
+  });
+
+
+}
+
+
+
+/* =========================
+   LOAD CREDIT CARD PAYMENTS
+========================= */
+
+function loadCreditCardPayments(){
+
+  callAppsScript(
+    "getCreditCardPayments",
+    []
+  )
+
+  .then(function(payments){
+
+    const table =
+      document.getElementById(
+        "creditCardPaymentsTable"
+      );
+
+
+    if(!table) return;
+
+
+    let tbody =
+      table.querySelector("tbody");
+
+
+    if(!tbody){
+
+      tbody =
+        document.createElement("tbody");
+
+      table.appendChild(tbody);
+
+    }
+
+
+    tbody.innerHTML = "";
+
+
+    if(
+      !payments ||
+      payments.length === 0
+    ){
+
+      tbody.innerHTML =
+      `
+      <tr>
+        <td colspan="4">
+          No payments yet
+        </td>
+      </tr>
+      `;
+
+      return;
+
+    }
+
+
+
+    payments.forEach(function(payment){
+
+
+      tbody.innerHTML +=
+      `
+      <tr>
+
+        <td>
+          ${payment.date
+          ? new Date(payment.date).toLocaleDateString()
+          : ""}
+        </td>
+
+
+        <td>
+          ${payment.cardName || payment.cardId || ""}
+        </td>
+
+
+        <td>
+          ₱${Number(payment.amount || 0)
+          .toLocaleString()}
+        </td>
+
+
+        <td>
+          ${payment.description || ""}
+        </td>
+
+
+      </tr>
+      `;
+
+
+    });
+
+
+  });
+
+}
+
+
+
+/* =========================
+   LOAD LOAN PAYMENTS
+========================= */
+
+function loadLoanPayments(){
+
+  callAppsScript(
+    "getLoanPayments",
+    []
+  )
+
+  .then(function(payments){
+
+    const table =
+      document.getElementById(
+        "loanTransactionsTable"
+      );
+
+
+    if(!table) return;
+
+
+    let tbody =
+      table.querySelector("tbody");
+
+
+    if(!tbody){
+
+      tbody =
+        document.createElement("tbody");
+
+      table.appendChild(tbody);
+
+    }
+
+
+    tbody.innerHTML = "";
+
+
+    if(
+      !payments ||
+      payments.length === 0
+    ){
+
+      tbody.innerHTML =
+      `
+      <tr>
+        <td colspan="4">
+          No payments yet
+        </td>
+      </tr>
+      `;
+
+      return;
+
+    }
+
+
+
+    payments.forEach(function(payment){
+
+      tbody.innerHTML +=
+      `
+      <tr>
+
+        <td>
+          ${payment.date
+          ? new Date(payment.date).toLocaleDateString()
+          : ""}
+        </td>
+
+
+        <td>
+          ${payment.loanName}
+        </td>
+
+
+        <td>
+          ₱${Number(payment.amount || 0)
+          .toLocaleString()}
+        </td>
+
+
+        <td>
+          ${payment.description || ""}
+        </td>
+
+
+      </tr>
+      `;
+
+
+    });
+
+
+  });
 
 }
 
