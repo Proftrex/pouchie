@@ -693,6 +693,10 @@ function openSavingsModal() {
 }
 
 function closeSavingsModal() {
+
+  closeTransactionModal();
+
+
   document.getElementById("savingsModal").style.display = "none";
 }
 
@@ -704,6 +708,10 @@ function openBondModal(){
 
 
 function closeBondModal(){
+
+  closeTransactionModal();
+
+
 
   document.getElementById("bondModal").style.display = "none";
 
@@ -724,6 +732,10 @@ function openWithdrawalModal(){
 
 function closeWithdrawalModal(){
 
+  closeTransactionModal();
+
+
+
   document.getElementById("withdrawalModal")
     .style.display = "none";
 
@@ -742,6 +754,10 @@ function openCryptoModal(){
 
 
 function closeCryptoModal(){
+
+  closeTransactionModal();
+
+
 
   document.getElementById("cryptoModal")
   .style.display = "none";
@@ -766,6 +782,10 @@ function openCommodityModal(){
 
 function closeCommodityModal(){
 
+  closeTransactionModal();
+
+
+
   document.getElementById("commodityModal")
   .style.display = "none";
 
@@ -789,6 +809,10 @@ function openStockModal(){
 
 
 function closeStockModal(){
+
+  closeTransactionModal();
+
+
 
   document.getElementById("stockModal")
   .style.display = "none";
@@ -5429,6 +5453,25 @@ function loadStockTransactions(){
    TRANSACTION MODAL
 ========================= */
 
+
+function closeTransactionModal(){
+
+  const modal =
+    document.getElementById(
+      "transactionModal"
+    );
+
+
+  if(modal){
+
+    modal.style.display = "none";
+
+  }
+
+}
+
+
+
 function showTransactionLoading(text = "Loading transaction..."){
 
 
@@ -6333,6 +6376,10 @@ function openPersonalIncomeModal(){
 
 function closePersonalIncomeModal(){
 
+  closeTransactionModal();
+
+
+
   const modal =
     document.getElementById("personalIncomeModal");
 
@@ -6922,6 +6969,10 @@ function openBusinessIncomeModal(){
 
 
 function closeBusinessIncomeModal(){
+
+  closeTransactionModal();
+
+
 
   const modal =
     document.getElementById(
@@ -7521,6 +7572,10 @@ window.editingCreditCardId = "";
 
 function closeCreditCardModal(){
 
+  closeTransactionModal();
+
+
+
   const modal =
     document.getElementById(
       "creditCardModal"
@@ -8092,6 +8147,10 @@ function openLoanModal(){
 ========================= */
 
 function closeLoanModal(){
+
+  closeTransactionModal();
+
+
 
   const modal =
     document.getElementById(
@@ -9182,6 +9241,10 @@ function openCreditCardPaymentModal(){
 
 function closeCreditCardPaymentModal(){
 
+  closeTransactionModal();
+
+
+
   document
   .getElementById("creditCardPaymentModal")
   .style.display = "none";
@@ -9388,6 +9451,10 @@ function openLoanPaymentModal(){
 
 
 function closeLoanPaymentModal(){
+
+  closeTransactionModal();
+
+
 
   document
     .getElementById("loanPaymentModal")
