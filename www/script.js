@@ -873,6 +873,11 @@ function loadAssets() {
 
 function editLoan(id){
 
+  showTransactionLoading(
+    "Loading action..."
+  );
+
+
 
   callAppsScript(
     "getLoans",
@@ -8816,6 +8821,11 @@ function goBackDashboard(){
 
 function editCreditCard(id){
 
+  showTransactionLoading(
+    "Loading action..."
+  );
+
+
 
   callAppsScript(
     "getCreditCards",
@@ -9176,6 +9186,20 @@ function closeCreditCardPaymentModal(){
   .getElementById("creditCardPaymentModal")
   .style.display = "none";
 
+
+  const transactionModal =
+    document.getElementById(
+      "transactionModal"
+    );
+
+
+  if(transactionModal){
+
+    transactionModal.style.display =
+      "none";
+
+  }
+
 }
 
 
@@ -9183,7 +9207,7 @@ function closeCreditCardPaymentModal(){
 
 function loadCreditCardPaymentDropdown(){
 
-  callAppsScript(
+  return callAppsScript(
     "getCreditCards",
     []
   )
@@ -9271,8 +9295,19 @@ function saveCreditCardPayment(){
 
 
   callAppsScript(
-    "saveCreditCardPayment",
-    [data]
+    editingCreditCardPaymentId
+      ? "updateCreditCardPayment"
+      : "saveCreditCardPayment",
+    [
+      editingCreditCardPaymentId
+        ? {
+            id: editingCreditCardPaymentId,
+            cardId: data.cardId,
+            amount: data.amount,
+            description: data.description
+          }
+        : data
+    ]
   )
 
   .then(function(result){
@@ -9284,8 +9319,24 @@ function saveCreditCardPayment(){
 
 
       showTransactionSuccess(
-        "Payment saved!"
+        editingCreditCardPaymentId
+          ? "Payment updated!"
+          : "Payment saved!"
       );
+
+      editingCreditCardPaymentId = "";
+
+      const button =
+        document.getElementById(
+          "creditCardPaymentSaveButton"
+        );
+
+      if(button){
+
+        button.textContent =
+          "Save";
+
+      }
 
 
       loadCreditCards();
@@ -9318,6 +9369,11 @@ function saveCreditCardPayment(){
 ========================= */
 
 
+let editingLoanPaymentId = "";
+let creditCardPaymentsCache = [];
+let editingCreditCardPaymentId = "";
+
+
 function openLoanPaymentModal(){
 
   document
@@ -9336,6 +9392,20 @@ function closeLoanPaymentModal(){
   document
     .getElementById("loanPaymentModal")
     .style.display = "none";
+
+
+  const transactionModal =
+    document.getElementById(
+      "transactionModal"
+    );
+
+
+  if(transactionModal){
+
+    transactionModal.style.display =
+      "none";
+
+  }
 
 }
 
@@ -9425,8 +9495,17 @@ function saveLoanPayment(){
 
 
   callAppsScript(
-    "saveLoanPayment",
-    [data]
+    editingLoanPaymentId
+      ? "updateLoanPayment"
+      : "saveLoanPayment",
+    [
+      editingLoanPaymentId
+        ? {
+            id: editingLoanPaymentId,
+            ...data
+          }
+        : data
+    ]
   )
 
   .then(function(result){
@@ -9440,6 +9519,22 @@ function saveLoanPayment(){
       showTransactionSuccess(
         "Payment saved!"
       );
+
+
+      editingLoanPaymentId = "";
+
+
+      const button =
+        document.getElementById(
+          "loanPaymentSaveButton"
+        );
+
+      if(button){
+
+        button.textContent =
+          "Save Payment";
+
+      }
 
 
       loadLoans();
@@ -9478,6 +9573,9 @@ function loadCreditCardPayments(){
 
   .then(function(payments){
 
+    creditCardPaymentsCache = payments || [];
+
+
     const table =
       document.getElementById(
         "creditCardPaymentsTable"
@@ -9512,7 +9610,7 @@ function loadCreditCardPayments(){
       tbody.innerHTML =
       `
       <tr>
-        <td colspan="4">
+        <td colspan="5">
           No payments yet
         </td>
       </tr>
@@ -9554,6 +9652,26 @@ function loadCreditCardPayments(){
         </td>
 
 
+        <td>
+
+          <button
+            class="edit-btn"
+            onclick="editCreditCardPayment('${payment.id}')"
+          >
+            Edit
+          </button>
+
+
+          <button
+            class="delete-btn"
+            onclick="deleteCreditCardPayment('${payment.id}')"
+          >
+            Delete
+          </button>
+
+        </td>
+
+
       </tr>
       `;
 
@@ -9571,6 +9689,13 @@ function loadCreditCardPayments(){
    LOAD LOAN PAYMENTS
 ========================= */
 
+let loanPaymentsCache = [];
+
+
+
+
+
+
 function loadLoanPayments(){
 
   callAppsScript(
@@ -9579,6 +9704,9 @@ function loadLoanPayments(){
   )
 
   .then(function(payments){
+
+    loanPaymentsCache = payments || [];
+
 
     const table =
       document.getElementById(
@@ -9655,11 +9783,332 @@ function loadLoanPayments(){
         </td>
 
 
+        <td>
+
+          <button
+            class="edit-btn"
+            onclick="editLoanPayment('${payment.id}')"
+          >
+            Edit
+          </button>
+
+
+          <button
+            class="delete-btn"
+            onclick="deleteLoanPayment('${payment.id}')"
+          >
+            Delete
+          </button>
+
+        </td>
+
+
       </tr>
       `;
 
 
     });
+
+
+  });
+
+}
+
+
+
+/* =========================
+   DELETE LOAN PAYMENT
+========================= */
+
+function deleteLoanPayment(id){
+
+  if(!id){
+    return;
+  }
+
+
+  showTransactionLoading(
+    "Deleting payment..."
+  );
+
+
+  callAppsScript(
+    "deleteLoanPayment",
+    [id]
+  )
+
+  .then(function(result){
+
+    if(result && result.success){
+
+      showTransactionSuccess(
+        "Payment deleted successfully."
+      );
+
+
+      loadLoanPayments();
+
+    }
+    else{
+
+      showTransactionError(
+        result.message || "Unable to delete payment."
+      );
+
+    }
+
+  })
+
+  .catch(function(error){
+
+    console.error(
+      "Delete Loan Payment Error:",
+      error
+    );
+
+
+    showTransactionError(
+      "Unable to delete payment."
+    );
+
+  });
+
+}
+
+
+
+/* =========================
+   EDIT LOAN PAYMENT
+========================= */
+
+function editLoanPayment(id){
+
+  showTransactionLoading(
+    "Loading action..."
+  );
+
+
+  showTransactionLoading(
+    "Loading action..."
+  );
+
+
+  const payment =
+    loanPaymentsCache.find(function(item){
+
+      return String(item.id) === String(id);
+
+    });
+
+
+  if(!payment){
+    return;
+  }
+
+
+  editingLoanPaymentId = payment.id;
+
+
+  document.getElementById(
+    "loanPaymentAmount"
+  ).value = payment.amount;
+
+
+  document.getElementById(
+    "loanPaymentDescription"
+  ).value = payment.description || "";
+
+
+  const select =
+    document.getElementById(
+      "loanPaymentLoan"
+    );
+
+
+  if(select){
+
+    select.value =
+      payment.loanId;
+
+  }
+
+
+  const button =
+    document.getElementById(
+      "loanPaymentSaveButton"
+    );
+
+  if(button){
+
+    button.textContent =
+      "Update Payment";
+
+  }
+
+
+  document
+    .getElementById("loanPaymentModal")
+    .style.display = "flex";
+
+}
+
+
+
+/* =========================
+   DELETE CREDIT CARD PAYMENT
+========================= */
+
+function deleteCreditCardPayment(id){
+
+  console.log(
+    "DELETE CREDIT CARD PAYMENT CLICKED:",
+    id
+  );
+
+
+  if(!id){
+    return;
+  }
+
+
+  showTransactionLoading(
+    "Deleting payment..."
+  );
+
+
+  callAppsScript(
+    "deleteCreditCardPayment",
+    [id]
+  )
+
+  .then(function(result){
+
+    console.log(
+      "DELETE CREDIT CARD PAYMENT RESPONSE:",
+      result
+    );
+
+
+    if(result && result.success){
+
+      showTransactionSuccess(
+        "Payment deleted successfully."
+      );
+
+
+      loadCreditCardPayments();
+
+    }
+    else{
+
+      showTransactionError(
+        result.message ||
+        "Unable to delete payment."
+      );
+
+    }
+
+  })
+
+  .catch(function(error){
+
+    console.error(
+      "Delete Credit Card Payment Error:",
+      error
+    );
+
+
+    showTransactionError(
+      "Unable to delete payment."
+    );
+
+  });
+
+}
+
+
+
+/* =========================
+   EDIT CREDIT CARD PAYMENT
+========================= */
+
+function editCreditCardPayment(id){
+
+  showTransactionLoading(
+    "Loading action..."
+  );
+
+
+  showTransactionLoading(
+    "Loading action..."
+  );
+
+
+  const payment =
+    creditCardPaymentsCache.find(function(item){
+
+      return String(item.id) === String(id);
+
+    });
+
+
+  if(!payment){
+
+    console.log(
+      "Credit card payment not found:",
+      id
+    );
+
+    return;
+
+  }
+
+
+  editingCreditCardPaymentId =
+    payment.id;
+
+
+  loadCreditCardPaymentDropdown()
+  .then(function(){
+
+
+    document.getElementById(
+      "creditCardPaymentCard"
+    ).value =
+      payment.cardId;
+
+
+    document.getElementById(
+      "creditCardPaymentAmount"
+    ).value =
+      payment.amount;
+
+
+    document.getElementById(
+      "creditCardPaymentDescription"
+    ).value =
+      payment.description || "";
+
+
+    const button =
+      document.getElementById(
+        "creditCardPaymentSaveButton"
+      );
+
+
+    if(button){
+
+      button.textContent =
+        "Update Payment";
+
+    }
+
+
+    document
+      .getElementById(
+        "creditCardPaymentModal"
+      )
+      .style.display = "flex";
 
 
   });
