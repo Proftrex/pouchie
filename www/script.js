@@ -2216,6 +2216,9 @@ function renderDashboard(data) {
     dashboardCryptocurrencies:
       Number(data.assets?.cryptocurrencies) || 0,
 
+    dashboardStablecoins:
+      Number(data.assets?.stablecoins) || 0,
+
     dashboardBonds:
       Number(data.assets?.bonds) || 0,
 
