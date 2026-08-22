@@ -10,6 +10,21 @@
 
   <title>Pouch</title>
 
+
+  <script>
+    if(localStorage.getItem("pouchSession")){
+      document.documentElement.classList.add("has-session");
+    }
+  </script>
+
+
+  <style>
+    html.has-session #loginScreen{
+      display:none !important;
+    }
+  </style>
+
+
   <link rel="stylesheet" href="style.css">
 
 </head>
@@ -250,6 +265,14 @@
 
 
 
+  <button
+    class="logout-btn"
+    onclick="logout()"
+  >
+    Logout
+  </button>
+
+
   <footer class="pdax-sidebar-footer">
 
     <div class="footer-icons-only">
@@ -479,6 +502,33 @@
 
       <p>
         Stock Holdings
+      </p>
+
+    </div>
+
+
+
+    <div
+      class="summary-card"
+      onclick="showPage('stablecoins')"
+      style="cursor:pointer;"
+    >
+
+      <div class="pouch-category-icon">
+
+  <img 
+    src="assets/panda.png"
+    alt="Stablecoins"
+  >
+
+</div>
+
+      <h3>
+        Stablecoins
+      </h3>
+
+      <p>
+        Digital Cash
       </p>
 
     </div>
@@ -1288,6 +1338,13 @@
     </div>
 
 
+    <button
+      class="mobile-logout-btn"
+      onclick="logout()"
+    >
+      Logout
+    </button>
+
 
   </div>
 
@@ -1600,6 +1657,11 @@
 
 
   </div>
+
+
+  <!-- =====================================================
+       PORTFOLIO HOLDINGS
+  ====================================================== -->
 
 
 </section>
@@ -2361,6 +2423,166 @@
 </section>
 
 
+
+
+<!-- =========================================================
+     STABLECOINS PAGE
+========================================================= -->
+
+<section
+  id="stablecoinsPage"
+  style="display:none;"
+>
+
+
+<div class="page-header">
+
+<button 
+  class="back-btn"
+  onclick="goBackDashboard()"
+>
+  ← Back
+</button>
+
+
+<h1>
+  Stablecoins
+</h1>
+
+
+<div class="page-actions">
+
+<button
+  class="action-btn"
+  onclick="openStablecoinModal()"
+>
+  + Add Stablecoin
+</button>
+
+</div>
+
+
+</div>
+
+
+
+<h2>
+  Portfolio Summary
+</h2>
+
+
+<div class="summary-grid">
+
+
+<div class="summary-card">
+
+<h3>
+Total Invested
+</h3>
+
+<p id="stablecoinTotalInvested">
+₱0.00
+</p>
+
+</div>
+
+
+<div class="summary-card">
+
+<h3>
+Current Value
+</h3>
+
+<p id="stablecoinCurrentValue">
+₱0.00
+</p>
+
+</div>
+
+
+<div class="summary-card">
+
+<h3>
+Total P&L
+</h3>
+
+<p id="stablecoinTotalPnL">
++₱0.00
+</p>
+
+</div>
+
+
+<div class="summary-card">
+
+<h3>
+Assets
+</h3>
+
+<p id="stablecoinAssets">
+0
+</p>
+
+</div>
+
+
+</div>
+
+
+
+<h2>
+Current Holdings
+</h2>
+
+
+<div
+id="stablecoinCards"
+class="asset-grid"
+></div>
+
+
+
+<h2>
+History
+</h2>
+
+
+<table id="stablecoinTransactionsTable">
+
+<thead>
+
+<tr>
+
+<th>Date</th>
+
+<th>Transaction Type</th>
+
+<th>Stablecoin</th>
+
+<th>Quantity</th>
+
+<th>Buy Price (PHP)</th>
+
+<th>Total Invested</th>
+
+<th>Notes</th>
+
+<th>Action</th>
+
+</tr>
+
+</thead>
+
+
+<tbody id="stablecoinTransactionTable"></tbody>
+
+
+</table>
+
+
+</section>
+
+
 </main>
 
 </div>
@@ -2648,14 +2870,6 @@
 
       <option value="Cardano (ADA)">
         Cardano (ADA)
-      </option>
-
-      <option value="USDT">
-        USDT
-      </option>
-
-      <option value="USDC">
-        USDC
       </option>
 
     </select>
@@ -2988,43 +3202,42 @@
 
     <select id="stockName">
 
-      <option value="">
-        Select Stock
-      </option>
+  <option value="">
+    Select Stock
+  </option>
 
-      <option value="Apple">
-        Apple
-      </option>
+  <option>Apple</option>
+  <option>Microsoft</option>
+  <option>Nvidia</option>
+  <option>Amazon</option>
+  <option>Meta</option>
+  <option>Google</option>
+  <option>Tesla</option>
+  <option>Netflix</option>
+  <option>Jollibee</option>
+  <option>SM Investments</option>
+  <option>BDO</option>
+  <option>BPI</option>
+  <option>Ayala Corporation</option>
+  <option>Ayala Land</option>
+  <option>ALI</option>
+  <option>ACEN</option>
+  <option>Globe Telecom</option>
+  <option>PLDT</option>
+  <option>ICTSI</option>
+  <option>URC</option>
+  <option>Puregold</option>
+  <option>Robinsons Retail</option>
+  <option>Megaworld</option>
+  <option>DMCI</option>
+  <option>Security Bank</option>
+  <option>UnionBank</option>
+  <option>EastWest</option>
+  <option>Bank of Commerce</option>
+  <option>Shell Pilipinas</option>
+  <option>Bloomberry</option>
 
-      <option value="Microsoft">
-        Microsoft
-      </option>
-
-      <option value="Nvidia">
-        Nvidia
-      </option>
-
-      <option value="Amazon">
-        Amazon
-      </option>
-
-      <option value="Meta">
-        Meta
-      </option>
-
-      <option value="Google">
-        Google
-      </option>
-
-      <option value="Tesla">
-        Tesla
-      </option>
-
-      <option value="Netflix">
-        Netflix
-      </option>
-
-    </select>
+</select>
 
 
     <label>
@@ -3302,8 +3515,11 @@
         Cancel
       </button>
 
-      <button onclick="submitCreditCard()">
-        Save
+      <button
+        id="creditCardSaveButton"
+        onclick="submitCreditCard()"
+      >
+        Save Credit Card
       </button>
 
     </div>
@@ -3427,10 +3643,11 @@
       </button>
 
       <button
+        id="loanSaveButton"
         type="button"
         onclick="submitLoan()"
       >
-        Save
+        Save Loan
       </button>
 
     </div>
@@ -3569,7 +3786,7 @@
 
     <div class="modal-actions">
 
-      <button onclick="closeLoanTransactionModal()">
+      <button onclick="closeLoanPaymentModal()">
         Cancel
       </button>
 
@@ -3665,6 +3882,194 @@
   </button>
 
 </nav>
+
+
+
+
+<!-- =========================================================
+     STABLECOIN MODAL
+========================================================= -->
+
+<div
+  id="stablecoinModal"
+  class="modal"
+>
+
+
+  <div class="modal-box">
+
+
+    <h2>
+      Add Stablecoin
+    </h2>
+
+
+
+    <label>
+      Date
+    </label>
+
+    <input
+      type="date"
+      id="stablecoinDate"
+    >
+
+
+
+    <label>
+      Transaction Type
+    </label>
+
+    <select
+      id="stablecoinTransactionType"
+    >
+
+      <option value="Buy">
+        Buy
+      </option>
+
+      <option value="Sell">
+        Sell
+      </option>
+
+    </select>
+
+
+
+    <label>
+      Stablecoin
+    </label>
+
+    <select
+      id="stablecoinName"
+    >
+
+      <option value="">
+        Select Stablecoin
+      </option>
+
+      <option value="USDT">
+        USDT - Tether
+      </option>
+
+      <option value="USDC">
+        USDC - USD Coin
+      </option>
+
+    </select>
+
+
+
+    <label>
+      Quantity
+    </label>
+
+    <input
+      type="number"
+      id="stablecoinQuantity"
+      placeholder="0"
+    >
+
+
+
+    <label>
+      Buy Price (PHP)
+    </label>
+
+    <input
+      type="number"
+      id="stablecoinBuyPrice"
+      placeholder="0.00"
+    >
+
+
+
+    <label>
+      Notes
+    </label>
+
+    <textarea
+      id="stablecoinNotes"
+      placeholder="Optional"
+    ></textarea>
+
+
+
+    <div class="modal-actions">
+
+
+      <button
+        class="cancel-btn"
+        onclick="closeStablecoinModal()"
+      >
+        Cancel
+      </button>
+
+
+
+      <button
+        class="action-btn"
+        onclick="saveStablecoin()"
+      >
+        Save Stablecoin
+      </button>
+
+
+    </div>
+
+
+  </div>
+
+
+</div>
+
+
+<!-- =========================
+     DELETE CONFIRMATION MODAL
+========================= -->
+
+<div
+  id="deleteConfirmModal"
+  class="modal"
+>
+
+  <div class="modal-box">
+
+    <h2>
+      Confirm Delete
+    </h2>
+
+
+    <p id="deleteConfirmMessage">
+      Are you sure you want to delete this?
+    </p>
+
+
+    <div class="modal-actions">
+
+
+      <button
+        class="cancel-btn"
+        onclick="closeDeleteConfirm()"
+      >
+        Cancel
+      </button>
+
+
+      <button
+        class="delete-btn"
+        onclick="executeDeleteConfirm()"
+      >
+        Delete
+      </button>
+
+
+    </div>
+
+
+  </div>
+
+</div>
 
 
 </body>
