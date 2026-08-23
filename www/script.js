@@ -1753,8 +1753,7 @@ function renderCryptoSummary(data){
 
   const cryptoAssets =
   [
-    ...(categories.Cryptocurrencies || []),
-    ...(categories.Stablecoins || [])
+    ...(categories.Cryptocurrencies || [])
   ];
 
 
@@ -1857,8 +1856,7 @@ function renderCryptoHoldings(data){
 
   const assets =
   [
-    ...(data.categories.Cryptocurrencies || []),
-    ...(data.categories.Stablecoins || [])
+    ...(data.categories.Cryptocurrencies || [])
   ];
 
 
@@ -10937,7 +10935,7 @@ function deleteLoanPayment(id){
 
 
   openDeleteConfirm(
-    "Delete this loan payment?",
+    "Are you sure you want to delete this?",
     function(){
 
       executeDeleteLoanPayment(id);
