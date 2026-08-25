@@ -105,7 +105,7 @@ body.mobile-device .sidebar {
   width: 100% !important;
   min-height: auto !important;
   height: auto !important;
-  position: fixed !important;
+  position: relative !important;
   top: auto !important;
   border-right: none !important;
   border-bottom: 1px solid var(--pouch-border) !important;
@@ -5529,20 +5529,166 @@ body:has(#loginScreen:not([style*="display: none"])) aside.sidebar {
    MOBILE LOGOUT ONLY
    ===================================================== */
 
-/* Hide mobile logout on desktop */
+/* =====================================================
+   LOGOUT BUTTON
+===================================================== */
+
 .mobile-logout-btn {
-  display: none !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: calc(100% - 32px);
+  margin: 16px;
+  padding: 10px 16px;
+
+  box-sizing: border-box;
+  cursor: pointer;
+
+  border: none !important;
+  outline: none !important;
+
+  border-radius: 16px;
+
+  background: #F7C6D9 !important;
+  background-image: none !important;
+
+  color: #8A3D5D !important;
+
+  font: inherit;
+  font-weight: 800;
+  font-size: 13px;
+
+  box-shadow: none !important;
+
+  appearance: none !important;
+  -webkit-appearance: none !important;
+}
+
+.mobile-logout-btn:hover,
+.mobile-logout-btn:active,
+.mobile-logout-btn:focus {
+  background: #F7C6D9 !important;
+  background-image: none !important;
+  color: #8A3D5D !important;
+
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* =========================================================
+   EXPLORE SECTION - TWO CARDS PER ROW
+========================================================= */
+
+.explore-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.explore-card {
+  min-width: 0;
+  width: auto;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.explore-card-cover {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  object-fit: cover;
+}
+
+.explore-card-content {
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.explore-card-content h3,
+.explore-card-content p {
+  overflow-wrap: break-word;
+}
+
+@media (max-width: 700px) {
+  .explore-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 
-@media screen and (max-width:1100px) {
 
-  .mobile-logout-btn {
+/* =====================================================
+   MOBILE: HIDE SIDEBAR LOGOUT
+===================================================== */
+
+@media screen and (max-width: 1100px) {
+  aside.sidebar .mobile-logout-btn {
+    display: none !important;
+  }
+}
+
+/* =====================================================
+   MOBILE: TOP-RIGHT LOGOUT ONLY
+===================================================== */
+
+@media screen and (max-width: 1100px) {
+  .mobile-top-logout-wrapper {
     display: flex !important;
-    align-items: center;
-    justify-content: center;
+    justify-content: flex-end;
+    width: 100%;
+    margin-top: 10px;
+    margin-bottom: 16px;
   }
 
+  #mobileTopLogout {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+
+    padding: 9px 18px;
+
+    border: none !important;
+    outline: none !important;
+    border-radius: 16px;
+
+    background: #F7C6D9 !important;
+    background-image: none !important;
+
+    color: #8A3D5D !important;
+
+    font: inherit;
+    font-weight: 800;
+    font-size: 13px;
+
+    cursor: pointer;
+    box-shadow: none !important;
+
+    appearance: none !important;
+    -webkit-appearance: none !important;
+  }
+
+  #mobileTopLogout:hover,
+  #mobileTopLogout:active,
+  #mobileTopLogout:focus {
+    background: #F7C6D9 !important;
+    background-image: none !important;
+    color: #8A3D5D !important;
+
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+  }
 }
 
-
+/* Desktop: don't show mobile top logout */
+@media screen and (min-width: 1101px) {
+  .mobile-top-logout-wrapper {
+    display: none !important;
+  }
+}

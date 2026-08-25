@@ -105,22 +105,27 @@ function callAppsScript(action,args=[]){
 
 function detectDevice() {
 
-  var isMobile =
-    window.screen.width <= 768 ||
-    window.innerWidth <= 768 ||
-    /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+  /*
+   * Use the actual browser viewport width.
+   * Do not use screen.width or user-agent detection,
+   * because desktop browsers and responsive previews
+   * can otherwise be incorrectly classified as mobile.
+   */
 
-  if (isMobile) {
-    document.body.classList.add("mobile-device");
-  } else {
-    document.body.classList.remove("mobile-device");
-  }
+  var isMobile = window.innerWidth <= 768;
+
+  document.body.classList.toggle(
+    "mobile-device",
+    isMobile
+  );
 
 }
 
 window.addEventListener("load", function() {
 
   detectDevice();
+
+  window.addEventListener("resize", detectDevice);
 
 
   /*
@@ -5648,35 +5653,15 @@ function loadStablecoinSummary(){
 
 function openStablecoinModal(){
 
-  console.log("STABLECOIN BUTTON CLICKED");
-
-  const modal =
-    document.getElementById(
-      "stablecoinModal"
-    );
+  document.getElementById("stablecoinModal")
+  .style.display = "flex";
 
 
-  if(modal){
-
-    modal.style.display = "flex";
-
-  }
-
-
-  const date =
-    document.getElementById(
-      "stablecoinDate"
-    );
-
-
-  if(date){
-
-    date.value =
-      new Date()
-      .toISOString()
-      .split("T")[0];
-
-  }
+  document.getElementById("stablecoinDate")
+  .value =
+    new Date()
+    .toISOString()
+    .split("T")[0];
 
 }
 

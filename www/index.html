@@ -249,6 +249,15 @@
 </nav>
 
 
+  <button
+    type="button"
+    class="mobile-logout-btn"
+    onclick="logout()"
+  >
+    Logout
+  </button>
+
+
   <footer class="pdax-sidebar-footer">
 
     <div class="footer-icons-only">
@@ -302,7 +311,6 @@
     </p>
 
   </footer>
-
 
 </aside>
 
@@ -717,54 +725,7 @@
   ></div>
 
 
-  <!-- =========================================================
-       STABLECOIN MODAL
-  ========================================================= -->
 
-  <div
-    id="stablecoinModal"
-    class="modal"
-  >
-
-    <div class="modal-box">
-
-      <h2>
-        Add Stablecoin
-      </h2>
-
-      <label>Date</label>
-      <input type="date" id="stablecoinDate">
-
-      <label>Transaction Type</label>
-      <select id="stablecoinTransactionType">
-        <option value="Buy">Buy</option>
-        <option value="Sell">Sell</option>
-      </select>
-
-      <label>Stablecoin</label>
-      <select id="stablecoinName">
-        <option value="">Select Stablecoin</option>
-        <option value="USDT">USDT - Tether</option>
-        <option value="USDC">USDC - USD Coin</option>
-      </select>
-
-      <label>Quantity</label>
-      <input type="number" id="stablecoinQuantity" placeholder="0" step="any" min="0">
-
-      <label>Buy Price (PHP)</label>
-      <input type="number" id="stablecoinBuyPrice" placeholder="0.00" step="0.01" min="0">
-
-      <label>Notes</label>
-      <textarea id="stablecoinNotes" placeholder="Optional"></textarea>
-
-      <div class="modal-actions">
-        <button onclick="closeStablecoinModal()">Cancel</button>
-        <button class="action-btn" onclick="saveStablecoin()">Save Stablecoin</button>
-      </div>
-
-    </div>
-
-  </div>
 
 
   <h2>
@@ -1359,6 +1320,16 @@
       <p class="dashboard-welcome">
         Here's what's inside your pouch today.
       </p>
+
+      <div class="mobile-top-logout-wrapper">
+        <button
+          id="mobileTopLogout"
+          type="button"
+          onclick="logout()"
+        >
+          Logout
+        </button>
+      </div>
 
     </div>
 
@@ -3946,6 +3917,99 @@
 
 </nav>
 
+
+
+
+  <!-- =========================================================
+       STABLECOIN MODAL
+  ========================================================= -->
+
+  <div
+    id="stablecoinModal"
+    class="modal"
+  >
+
+    <div class="modal-box">
+
+      <h2>
+        Add Stablecoin
+      </h2>
+
+      <label>Date</label>
+      <input type="date" id="stablecoinDate">
+
+      <label>Transaction Type</label>
+      <select id="stablecoinTransactionType">
+        <option value="Buy">Buy</option>
+        <option value="Sell">Sell</option>
+      </select>
+
+      <label>Stablecoin</label>
+      <select id="stablecoinName">
+        <option value="">Select Stablecoin</option>
+        <option value="USDT">USDT - Tether</option>
+        <option value="USDC">USDC - USD Coin</option>
+      </select>
+
+      <label>Quantity</label>
+      <input type="number" id="stablecoinQuantity" placeholder="0" step="any" min="0">
+
+      <label>Buy Price (PHP)</label>
+      <input type="number" id="stablecoinBuyPrice" placeholder="0.00" step="0.01" min="0">
+
+      <label>Notes</label>
+      <textarea id="stablecoinNotes" placeholder="Optional"></textarea>
+
+      <div class="modal-actions">
+        <button onclick="closeStablecoinModal()">Cancel</button>
+        <button class="action-btn" onclick="saveStablecoin()">Save Stablecoin</button>
+      </div>
+
+    </div>
+
+  </div>
+
+
+
+<!-- =========================================================
+     GLOBAL DELETE CONFIRMATION MODAL
+========================================================= -->
+
+<div
+  id="deleteConfirmModal"
+  class="modal"
+>
+  <div class="modal-box">
+
+    <h2>
+      Confirm Delete
+    </h2>
+
+    <p id="deleteConfirmMessage">
+      Are you sure you want to delete this item?
+    </p>
+
+    <div class="modal-actions">
+
+      <button
+        type="button"
+        onclick="closeDeleteConfirm()"
+      >
+        Cancel
+      </button>
+
+      <button
+        type="button"
+        class="delete-btn"
+        onclick="executeDeleteConfirm()"
+      >
+        Delete
+      </button>
+
+    </div>
+
+  </div>
+</div>
 
 </body>
 
