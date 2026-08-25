@@ -119,8 +119,15 @@ body.mobile-device .sidebar-menu {
 
 body.mobile-device .content {
   width: 100% !important;
+  max-width: 100% !important;
   min-width: 0 !important;
+  margin: 0 auto !important;
   padding: 28px 18px 120px !important;
+  box-sizing: border-box !important;
+}
+
+body.mobile-device .content > * {
+  box-sizing: border-box !important;
 }
 
 body.mobile-device .page-header {

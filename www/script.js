@@ -1829,7 +1829,6 @@ function renderCryptoSummary(data){
 
 function renderCryptoHoldings(data){
 
-
   const container =
     document.getElementById(
       "cryptoCards"
@@ -1850,14 +1849,18 @@ function renderCryptoHoldings(data){
   ];
 
 
-
   if(assets.length === 0){
 
-    container.innerHTML =
-    `
-    <p>
-    No crypto holdings yet.
-    </p>
+    container.innerHTML = `
+
+      <div class="asset-card">
+
+        <h3>
+          No cryptocurrencies yet
+        </h3>
+
+      </div>
+
     `;
 
     return;
@@ -1865,59 +1868,81 @@ function renderCryptoHoldings(data){
   }
 
 
+  let html = "";
+
 
   assets.forEach(function(asset){
 
+    html += `
 
-    container.innerHTML +=
-    `
-
-    <div class="asset-card">
+      <div class="asset-card">
 
 
-      <h3>
-      ${asset.assetName}
-      </h3>
+        <h2>
+          ${asset.assetName}
+        </h2>
 
 
-      <p>
-      Quantity:
-      ${asset.quantity}
-      </p>
+        <p>
+          Quantity:
+          ${Number(asset.quantity || 0)
+            .toLocaleString()}
+        </p>
 
 
-      <p>
-      Invested:
-      ${formatPeso(asset.invested)}
-      </p>
+        <p>
+          Total Invested:
+          ${formatPeso(asset.invested || 0)}
+        </p>
 
 
-      <p>
-      Current Value:
-      ${formatPeso(asset.currentValue)}
-      </p>
+        <p>
+          Average Buy Price:
+          ${formatPeso(asset.averagePrice || 0)}
+        </p>
 
 
-      <p class="${asset.pnl >=0 ? "positive":"negative"}">
-
-      P&L:
-      ${formatPeso(asset.pnl)}
-
-      </p>
+        <p>
+          Current Price:
+          ${formatPeso(asset.currentPrice || 0)}
+        </p>
 
 
-    </div>
+        <p>
+          Current Value:
+          ${formatPeso(asset.currentValue || 0)}
+        </p>
+
+
+        <p class="${
+          Number(asset.pnl || 0) >= 0
+            ? "positive"
+            : "negative"
+        }">
+
+          P&L:
+          ${
+            Number(asset.pnl || 0) >= 0
+              ? "+"
+              : ""
+          }
+
+          ${formatPeso(asset.pnl || 0)}
+
+        </p>
+
+
+      </div>
 
     `;
-
 
   });
 
 
+  container.innerHTML =
+    html;
+
 }
-
-
-
 function loadCryptoSummary(){
 
   callAppsScript(
