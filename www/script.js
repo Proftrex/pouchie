@@ -2534,7 +2534,7 @@ function loadDashboardSavings() {
 
       let html = `
 
-        <h2>Digital Cash</h2>
+        <h2>Fiat</h2>
 
 
         <h3>
