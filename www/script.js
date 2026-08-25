@@ -2388,10 +2388,14 @@ function renderDashboard(data) {
 
     if (largest && largest.value > 0) {
 
-      largestElement.textContent =
-        largest.name +
-        " · " +
-        formatPeso(largest.value);
+      largestElement.innerHTML = `
+        <span class="insight-asset-name">
+          ${largest.name}
+        </span>
+        <span class="insight-asset-value">
+          · ${formatPeso(largest.value)}
+        </span>
+      `;
 
     } else {
 
@@ -2421,17 +2425,33 @@ function renderDashboard(data) {
 
     if (best) {
 
-      bestElement.textContent =
-        best.assetName +
-        " · " +
-        (
-          Number(best.pnl) >= 0
-            ? "+"
-            : ""
-        ) +
-        formatPeso(
-          Number(best.pnl) || 0
-        );
+      const pnl =
+        Number(best.pnl) || 0;
+
+
+      const sign =
+        pnl >= 0
+          ? "+"
+          : "";
+
+
+      bestElement.innerHTML = `
+
+        <span class="insight-asset-name">
+          ${best.assetName}
+        </span>
+
+        <span class="insight-asset-value ${
+          pnl >= 0
+            ? "positive"
+            : "negative"
+        }">
+
+          · ${sign}${formatPeso(pnl)}
+
+        </span>
+
+      `;
 
     } else {
 
