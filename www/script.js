@@ -11430,3 +11430,72 @@ function loadStablecoinTransactions(){
 
 }
 
+
+
+/* =========================================================
+   PWA INSTALL
+========================================================= */
+
+let deferredPouchInstallPrompt = null;
+
+window.addEventListener("beforeinstallprompt", function(event) {
+
+  event.preventDefault();
+
+  deferredPouchInstallPrompt = event;
+
+  const button =
+    document.getElementById("installPouchButton");
+
+  if(button) {
+    button.style.display = "inline-flex";
+  }
+
+});
+
+
+document.addEventListener("click", function(event) {
+
+  const button = event.target.closest("#installPouchButton");
+
+  if(!button) {
+    return;
+  }
+
+  if(!deferredPouchInstallPrompt) {
+    return;
+  }
+
+  deferredPouchInstallPrompt.prompt();
+
+  deferredPouchInstallPrompt.userChoice
+    .then(function(choice) {
+
+      console.log(
+        "Pouch install choice:",
+        choice.outcome
+      );
+
+      deferredPouchInstallPrompt = null;
+
+      button.style.display = "none";
+
+    });
+
+});
+
+
+window.addEventListener("appinstalled", function() {
+
+  const button =
+    document.getElementById("installPouchButton");
+
+  if(button) {
+    button.style.display = "none";
+  }
+
+  deferredPouchInstallPrompt = null;
+
+  console.log("Pouch was installed.");
+
+});

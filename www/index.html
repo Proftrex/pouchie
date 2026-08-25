@@ -12,6 +12,14 @@
 
   <link rel="stylesheet" href="style.css">
 
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#F7C6D9">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Pouch">
+
 </head>
 
 
@@ -335,6 +343,20 @@
 ========================================================= -->
 
 <main class="content">
+
+<!-- =========================================================
+     PWA INSTALL BUTTON
+========================================================= -->
+
+<button
+  id="installPouchButton"
+  class="pwa-install-btn"
+  type="button"
+  style="display:none;"
+>
+  Install Pouch
+</button>
+
 
 
 
@@ -4024,6 +4046,31 @@
 
   </div>
 </div>
+
+
+
+<script>
+/*
+ * Pouch PWA Service Worker
+ */
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", function() {
+    navigator.serviceWorker.register("./sw.js")
+      .then(function(registration) {
+        console.log(
+          "Pouch service worker registered:",
+          registration.scope
+        );
+      })
+      .catch(function(error) {
+        console.error(
+          "Pouch service worker registration failed:",
+          error
+        );
+      });
+  });
+}
+</script>
 
 </body>
 

@@ -1,0 +1,22 @@
+{
+  "name": "Pouch",
+  "short_name": "Pouch",
+  "description": "Don't put all your pennies in one pouch.",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#FFF8FA",
+  "theme_color": "#F7C6D9",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "assets/pouch-icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "assets/pouch-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

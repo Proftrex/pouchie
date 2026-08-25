@@ -5800,3 +5800,34 @@ aside.sidebar .mobile-logout-btn {
   margin-top: 6px;
 }
 
+
+
+/* =========================================================
+   PWA INSTALL BUTTON
+========================================================= */
+
+.pwa-install-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  margin: 0 0 18px auto;
+  padding: 10px 18px;
+
+  border: none;
+  border-radius: 16px;
+
+  background: #F7C6D9;
+  color: #8A3D5D;
+
+  font: inherit;
+  font-weight: 800;
+
+  cursor: pointer;
+  box-shadow: none;
+}
+
+.pwa-install-btn:hover {
+  background: #F2B5CC;
+}
+
