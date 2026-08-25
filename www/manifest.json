@@ -9,12 +9,12 @@
   "orientation": "portrait-primary",
   "icons": [
     {
-      "src": "assets/pouch-icon-192.png",
+      "src": "assets/pouchwhite.png",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "assets/pouch-icon-512.png",
+      "src": "assets/pouchwhite.png",
       "sizes": "512x512",
       "type": "image/png"
     }
