@@ -166,11 +166,7 @@ window.addEventListener("load", function() {
     }
 
 
-    setTimeout(function(){
-
-      loadDashboard();
-
-    },100);
+    loadDashboard();
 
   }
 
@@ -1660,18 +1656,7 @@ function loadDashboard() {
 
   .then(function(data){
 
-    console.log(
-      "========== DASHBOARD DATA =========="
-    );
-
-    console.log(
-      "FULL DATA:",
-      JSON.stringify(data, null, 2)
-    );
-
-    console.log("SAVINGS:", data?.assets?.savings);
-    console.log("CRYPTO:", data?.assets?.cryptocurrencies);
-    console.log("PORTFOLIO:", data?.portfolio);
+    console.log("Dashboard data loaded.");
 
 
 

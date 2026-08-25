@@ -17,6 +17,20 @@
 
 <body>
 
+<script>
+  /*
+   * Prevent login-screen flash when a saved Pouch session exists.
+   * The full session restoration is still handled by script.js.
+   */
+  try {
+    if (localStorage.getItem("pouchSession")) {
+      document.documentElement.classList.add("has-pouch-session");
+    }
+  } catch (e) {
+    console.warn("Unable to check saved Pouch session:", e);
+  }
+</script>
+
 
 <!-- =========================================================
      LOGIN SCREEN
