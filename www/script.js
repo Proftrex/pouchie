@@ -3624,7 +3624,7 @@ function submitCommodity(){
   ){
 
     showTransactionError(
-      "Please complete commodity details."
+      "Please complete gold/silver details."
     );
 
     return;
@@ -3639,7 +3639,7 @@ function submitCommodity(){
 
   // SHOW LOADING MODAL
 
-  showTransactionLoading("Saving commodity...");
+  showTransactionLoading("Saving gold/silver transaction...");
 
 
 
@@ -3670,7 +3670,7 @@ function submitCommodity(){
 
       showTransactionError(
         response?.message ||
-        "Unable to save commodity"
+        "Unable to save gold/silver"
       );
 
 
@@ -3683,7 +3683,7 @@ function submitCommodity(){
     // SHOW SUCCESS MODAL
 
     showTransactionSuccess(
-      "Commodity saved successfully."
+      "Gold/Silver saved successfully."
     );
 
 
@@ -3709,7 +3709,7 @@ function submitCommodity(){
 
 
     showTransactionError(
-      "Failed saving commodity"
+      "Failed saving gold/silver"
     );
 
 
@@ -3906,7 +3906,7 @@ function loadAvailableCommoditiesForSell(){
 
 
     dropdown.innerHTML =
-    "<option value=''>Select Commodity</option>";
+    "<option value=''>Select Gold/Silver</option>";
 
 
 
@@ -3983,7 +3983,7 @@ function commodityTransactionChanged(){
     dropdown.innerHTML = `
 
     <option value="">
-    Select Commodity
+    Select Gold/Silver
     </option>
 
     <option value="Gold">
