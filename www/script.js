@@ -6795,31 +6795,22 @@ function registerUser(){
 
 function loginUser(){
 
-  const loginButton = document.getElementById("loginButton");
-
-  if(loginButton){
-    loginButton.innerHTML = "Logging in...";
-    loginButton.disabled = true;
-  }
-
   const email =
-    document
-      .getElementById("loginEmail")
-      .value
-      .trim();
+    document.getElementById("loginEmail").value.trim().toLowerCase();
 
   const password =
-    document
-      .getElementById("loginPassword")
-      .value
-      .trim();
+    document.getElementById("loginPassword").value.trim();
+
+  const loginButton =
+    document.getElementById("loginButton");
+
+  const loginMessage =
+    document.getElementById("loginMessage");
 
 
   if(!email){
 
-    document
-      .getElementById("loginMessage")
-      .innerHTML =
+    loginMessage.innerHTML =
       "Please enter your email.";
 
     return;
@@ -6827,29 +6818,66 @@ function loginUser(){
   }
 
 
-  showTransactionLoading(
-    "Logging in..."
+  if(!password){
+
+    loginMessage.innerHTML =
+      "Please enter your password.";
+
+    return;
+
+  }
+
+
+  if(loginButton){
+
+    loginButton.innerHTML =
+      "Logging in...";
+
+    loginButton.disabled =
+      true;
+
+  }
+
+
+  loginMessage.innerHTML =
+    "Logging in...";
+
+
+  console.log(
+    "========== LOGIN FRONTEND START =========="
   );
 
 
   callAppsScript(
     "loginUser",
-    [
-      email,
-      password
-    ]
+    [email,password]
   )
 
   .then(function(result){
 
+    console.log(
+      "========== LOGIN FRONTEND RESPONSE =========="
+    );
 
     console.log(
-      "LOGIN RESPONSE:",
+      "RESULT:",
       result
     );
 
+    console.log(
+      "RESULT SUCCESS:",
+      result && result.success
+    );
 
-    if(result.success){
+
+    if(
+      result &&
+      result.success === true
+    ){
+
+      console.log(
+        "========== LOGIN SUCCESS =========="
+      );
 
 
       window.loggedInUser = {
@@ -6859,79 +6887,156 @@ function loginUser(){
 
       localStorage.setItem(
         "pouchSession",
-        JSON.stringify(window.loggedInUser)
+        JSON.stringify(
+          window.loggedInUser
+        )
       );
 
 
-      document
-        .getElementById("loginScreen")
-        .style.display = "none";
+      document.documentElement.classList.add(
+        "has-pouch-session"
+      );
 
 
-      document
-        .getElementById("mainApp")
-        .style.display = "flex";
+      const loginScreen =
+        document.getElementById("loginScreen");
 
 
-      const transactionModal =
-        document.getElementById("transactionModal");
+      const mainApp =
+        document.getElementById("mainApp");
 
 
-      if(transactionModal){
+      console.log(
+        "LOGIN SCREEN ELEMENT:",
+        loginScreen
+      );
 
-        transactionModal.style.display = "none";
+
+      console.log(
+        "MAIN APP ELEMENT:",
+        mainApp
+      );
+
+
+      if(loginScreen){
+
+        loginScreen.style.display =
+          "none";
+
+        loginScreen.hidden =
+          true;
 
       }
 
 
+      if(mainApp){
+
+        mainApp.style.display =
+          "flex";
+
+        mainApp.hidden =
+          false;
+
+      }
+
+
+      console.log(
+        "LOGIN SCREEN DISPLAY:",
+        loginScreen
+          ? loginScreen.style.display
+          : "NOT FOUND"
+      );
+
+
+      console.log(
+        "MAIN APP DISPLAY:",
+        mainApp
+          ? mainApp.style.display
+          : "NOT FOUND"
+      );
+
+
+      if(loginButton){
+
+        loginButton.innerHTML =
+          "Enter Pouch";
+
+        loginButton.disabled =
+          false;
+
+      }
+
+
+      loginMessage.innerHTML =
+        "";
+
+
       setTimeout(function(){
+
+        console.log(
+          "========== LOADING DASHBOARD =========="
+        );
 
         loadDashboard();
 
       },100);
 
-
     }
 
     else{
 
+      console.error(
+        "LOGIN FAILED:",
+        result
+      );
 
-      document
-        .getElementById("loginMessage")
-        .innerHTML =
-         "Email and Password do not match. Make sure you are using the correct login details.";
 
+      loginMessage.innerHTML =
+        result &&
+        result.message
+        ?
+        result.message
+        :
+        "Email and Password do not match.";
+
+
+      if(loginButton){
+
+        loginButton.innerHTML =
+          "Enter Pouch";
+
+        loginButton.disabled =
+          false;
+
+      }
 
     }
 
-
   })
-
 
   .catch(function(error){
 
-
     console.error(
-      "LOGIN ERROR:",
+      "========== LOGIN FRONTEND ERROR ==========",
       error
     );
 
 
-    document
-      .getElementById("loginMessage")
-      .innerHTML =
+    loginMessage.innerHTML =
       "Unable to login. Please try again.";
 
-    const loginButton = document.getElementById("loginButton");
 
     if(loginButton){
-      loginButton.innerHTML = "Enter Pouch";
-      loginButton.disabled = false;
+
+      loginButton.innerHTML =
+        "Enter Pouch";
+
+      loginButton.disabled =
+        false;
+
     }
 
-
   });
-
 
 }
 
@@ -10153,6 +10258,11 @@ function logout(){
 
   localStorage.removeItem(
     "pouchSession"
+  );
+
+  // Remove the persistent-session CSS state
+  document.documentElement.classList.remove(
+    "has-pouch-session"
   );
 
 

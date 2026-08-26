@@ -6065,4 +6065,27 @@ aside.sidebar .mobile-logout-btn {
 
 
 
->>>>>>> 1f0e2b9 (Refine mobile dashboard insights)
+>>>>>>> 1f0e2b9 (Refine mobile dashboard insights)\n\n
+/* =========================================================
+   MOBILE DASHBOARD LOGOUT — FIXED RIGHT POSITION
+========================================================= */
+
+@media screen and (max-width: 1100px) {
+
+  #dashboardPage .mobile-top-logout-wrapper {
+    display: flex !important;
+    justify-content: flex-end !important;
+    width: calc(100vw - 36px) !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  #dashboardPage #mobileTopLogout {
+    margin-left: auto !important;
+    margin-right: 0 !important;
+  }
+
+}
+
+
