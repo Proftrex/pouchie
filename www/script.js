@@ -1666,9 +1666,22 @@ function loadDashboard() {
 
     renderDashboard(data);
 
+    loadPouchContent();
 
 
-    loadDashboardSavings();
+    /*
+     * Savings is already included in getDashboard().
+     * Render it directly instead of making another
+     * getSavingsSummary() request.
+     */
+
+    if(data.savings){
+
+      renderDashboardSavings(
+        data.savings
+      );
+
+    }
 
 
     loadPersonalIncome();
@@ -2500,6 +2513,157 @@ function renderPortfolioHoldings(portfolio){
 
 }
 
+function renderDashboardSavings(data){
+
+  const container =
+    document.getElementById(
+      "dashboardSavingsCards"
+    );
+
+  if(!container || !data) return;
+
+  container.innerHTML = "";
+
+
+  /*
+   * =========================
+   * CASH CARD
+   * =========================
+   */
+
+  const cash =
+    document.createElement("div");
+
+  cash.className = "asset-card";
+
+  cash.innerHTML = `
+
+    <h2>Cash</h2>
+
+    <h3>
+      ${formatPeso(data.cash?.total || 0)}
+    </h3>
+
+    <p>
+      Increase (30 Days):
+      <strong class="${
+        Number(data.cash?.change30 || 0) >= 0
+          ? "positive"
+          : "negative"
+      }">
+
+        ${
+          Number(data.cash?.change30 || 0) >= 0
+            ? "+"
+            : ""
+        }
+
+        ${formatPeso(data.cash?.change30 || 0)}
+
+      </strong>
+    </p>
+
+  `;
+
+  container.appendChild(cash);
+
+
+  /*
+   * =========================
+   * DIGITAL CASH CARD
+   * =========================
+   */
+
+  const digital =
+    document.createElement("div");
+
+  digital.className = "asset-card";
+
+
+  let html = `
+
+    <h2>Fiat</h2>
+
+    <h3>
+      ${formatPeso(data.digital?.total || 0)}
+    </h3>
+
+    <p>
+      Increase (30 Days):
+      <strong class="${
+        Number(data.digital?.change30 || 0) >= 0
+          ? "positive"
+          : "negative"
+      }">
+
+        ${
+          Number(data.digital?.change30 || 0) >= 0
+            ? "+"
+            : ""
+        }
+
+        ${formatPeso(data.digital?.change30 || 0)}
+
+      </strong>
+    </p>
+
+  `;
+
+
+  Object.keys(data.digital?.banks || {})
+    .sort()
+    .forEach(function(bank){
+
+      const info =
+        data.digital.banks[bank] || {};
+
+      const increase =
+        Number(info.increase30 || 0);
+
+      html += `
+
+        <hr>
+
+        <h3>
+          ${bank}
+        </h3>
+
+        <p>
+          Total:
+          ${formatPeso(info.total || 0)}
+        </p>
+
+        <p>
+          30 Days:
+          <strong class="${
+            increase >= 0
+              ? "positive"
+              : "negative"
+          }">
+
+            ${increase >= 0 ? "+" : ""}
+            ${formatPeso(increase)}
+
+          </strong>
+        </p>
+
+      `;
+
+    });
+
+
+  digital.innerHTML = html;
+
+  container.appendChild(digital);
+
+}
+
+
+/* =========================
+   LOAD DASHBOARD SAVINGS
+   LEGACY / STANDALONE
+========================= */
+
 function loadDashboardSavings() {
 
   callAppsScript(
@@ -2666,6 +2830,449 @@ function loadDashboardSavings() {
 
 
 }
+
+
+/* =========================
+   POUCH CONTENT
+========================= */
+
+function loadPouchContent(){
+
+  callAppsScript(
+    "getPouchContent",
+    []
+  )
+
+  .then(function(data){
+
+    if(!data) return;
+
+    renderPouchFeatured(
+      data.featured || []
+    );
+
+    renderPouchNewsEvents(
+      data.news || [],
+      data.events || []
+    );
+
+    renderPouchPromos(
+      data.promos || []
+    );
+
+  })
+
+  .catch(function(error){
+
+    console.error(
+      "Pouch Content Error:",
+      error
+    );
+
+  });
+
+}
+
+
+/* =========================
+   NEWS & EVENTS
+========================= */
+
+function renderPouchNewsEvents(news, events){
+
+  const newsContainer =
+    document.getElementById("exploreNews");
+
+  const eventsContainer =
+    document.getElementById("exploreEvents");
+
+
+  /*
+   * =========================
+   * NEWS
+   * =========================
+   */
+
+  if(newsContainer){
+
+    let html = "";
+
+    news.forEach(function(item){
+
+      html += `
+
+        <article class="explore-card">
+
+          ${
+            item.Image
+              ? `
+                <img
+                  class="explore-card-cover"
+                  src="${item.Image}"
+                  alt="${item.Title || "News"}"
+                  loading="lazy"
+                >
+              `
+              : ""
+          }
+
+          <div class="explore-card-content">
+
+            <h3>
+              <img src="assets/news.png" class="explore-title-icon" alt=""> ${item.Title || ""}
+            </h3>
+
+            <p>
+              ${item.Description || ""}
+            </p>
+
+            ${
+              item.Link
+                ? `
+                  <button
+                    class="pdax-action-btn"
+                    type="button"
+                    onclick="window.open('${item.Link}','_blank')"
+                  >
+                    Read More
+                  </button>
+                `
+                : ""
+            }
+
+          </div>
+
+        </article>
+
+      `;
+
+    });
+
+
+    if(!html){
+
+      html = `
+        <p>
+          No news available right now.
+        </p>
+      `;
+
+    }
+
+
+    newsContainer.className =
+      html.includes("<article")
+        ? "explore-grid"
+        : "explore-placeholder";
+
+    newsContainer.innerHTML = html;
+
+  }
+
+
+  /*
+   * =========================
+   * EVENTS
+   * =========================
+   */
+
+  if(eventsContainer){
+
+    let html = "";
+
+    events.forEach(function(item){
+
+      html += `
+
+        <article class="explore-card">
+
+          ${
+            item.Image
+              ? `
+                <img
+                  class="explore-card-cover"
+                  src="${item.Image}"
+                  alt="${item.Title || "Event"}"
+                  loading="lazy"
+                >
+              `
+              : ""
+          }
+
+          <div class="explore-card-content">
+
+            <h3>
+              <img src="assets/calendar.png" class="explore-title-icon" alt=""> ${item.Title || ""}
+            </h3>
+
+            <p>
+              ${item.Description || ""}
+            </p>
+
+            ${
+              item["Event Date"]
+                ? `
+                  <p>
+                    <strong>
+                      ${formatContentDate(item["Event Date"])}
+                    </strong>
+                  </p>
+                `
+                : ""
+            }
+
+            ${
+              item.Link
+                ? `
+                  <button
+                    class="pdax-action-btn"
+                    type="button"
+                    onclick="window.open('${item.Link}','_blank')"
+                  >
+                    View Event
+                  </button>
+                `
+                : ""
+            }
+
+          </div>
+
+        </article>
+
+      `;
+
+    });
+
+
+    if(!html){
+
+      html = `
+        <p>
+          No events available right now.
+        </p>
+      `;
+
+    }
+
+
+    eventsContainer.className =
+      html.includes("<article")
+        ? "explore-grid"
+        : "explore-placeholder";
+
+    eventsContainer.innerHTML = html;
+
+  }
+
+}
+
+
+/* =========================
+   FEATURED APPS
+========================= */
+
+function renderPouchFeatured(featured){
+
+  const container =
+    document.getElementById(
+      "exploreFeatured"
+    );
+
+  if(!container) return;
+
+  let html = "";
+
+  featured.forEach(function(item){
+
+    html += `
+
+      <article class="explore-card">
+
+        ${
+          item.Image
+            ? `
+              <img
+                class="explore-card-cover"
+                src="${item.Image}"
+                alt="${item.Title || "Featured App"}"
+                loading="lazy"
+              >
+            `
+            : ""
+        }
+
+        <div class="explore-card-content">
+
+          <h3>
+            ${item.Title || ""}
+          </h3>
+
+          <p>
+            ${item.Description || ""}
+          </p>
+
+          ${
+            item.Link
+              ? `
+                <button
+                  class="pdax-action-btn"
+                  type="button"
+                  onclick="window.open('${item.Link}','_blank')"
+                >
+                  Explore
+                </button>
+              `
+              : ""
+          }
+
+        </div>
+
+      </article>
+
+    `;
+
+  });
+
+
+  if(!html){
+
+    html = `
+      <p>
+        No featured apps available right now.
+      </p>
+    `;
+
+  }
+
+
+  container.className =
+    html.includes("<article")
+      ? "explore-grid"
+      : "explore-placeholder";
+
+  container.innerHTML = html;
+
+}
+
+
+/* =========================
+   PROMOS
+========================= */
+
+
+
+function renderPouchPromos(promos){
+
+  const container =
+    document.getElementById(
+      "explorePromos"
+    );
+
+  if(!container) return;
+
+  let html = "";
+
+  promos.forEach(function(item){
+
+    html += `
+
+      <article class="explore-card">
+
+        ${
+          item.Image
+            ? `
+              <img
+                class="explore-card-cover"
+                src="${item.Image}"
+                alt="${item.Title || "Promo"}"
+                loading="lazy"
+              >
+            `
+            : ""
+        }
+
+        <div class="explore-card-content">
+
+          <h3>
+            <img src="assets/gift.png" class="explore-title-icon" alt=""> ${item.Title || ""}
+          </h3>
+
+          <p>
+            ${item.Description || ""}
+          </p>
+
+          <p class="explore-card-date">
+            <strong>
+              ${formatContentDate(item["Start Date"])}
+              ${
+                item["End Date"]
+                  ? " – " + formatContentDate(item["End Date"])
+                  : ""
+              }
+            </strong>
+          </p>
+
+          <button
+            class="pdax-action-btn"
+            type="button"
+            onclick="window.open('${item.Link || "#"}','_blank')"
+          >
+            View Promo
+          </button>
+
+        </div>
+
+      </article>
+
+    `;
+
+  });
+
+  if(!html){
+
+    html = `
+      <p>
+        Stay tuned for exciting promos and offers.
+      </p>
+    `;
+
+  }
+
+  container.className =
+    html.includes("<article")
+      ? "explore-grid"
+      : "explore-placeholder";
+
+  container.innerHTML = html;
+
+}
+
+
+/* =========================
+   CONTENT DATE
+========================= */
+
+function formatContentDate(value){
+
+  if(!value) return "";
+
+  const date = new Date(value);
+
+  if(isNaN(date.getTime())){
+    return String(value);
+  }
+
+  return date.toLocaleDateString(
+    undefined,
+    {
+      year: "numeric",
+      month: "short",
+      day: "numeric"
+    }
+  );
+
+}
+
 
 /* =========================
    HELPERS
