@@ -5731,15 +5731,15 @@ aside.sidebar .mobile-logout-btn {
 ========================================================= */
 
 .explore-card {
-  border: 2px solid #F6E7A8 !important;
+  border: 2px solid #F7C6D9 !important;
   border-radius: 18px !important;
-  background: #FFFDF4 !important;
+  background: #FFF5F8 !important;
   box-shadow: 0 4px 14px rgba(90, 70, 30, 0.06) !important;
   overflow: hidden;
 }
 
 .explore-card:hover {
-  border-color: #F1D98A !important;
+  border-color: #F2B5CC !important;
   box-shadow: 0 6px 18px rgba(90, 70, 30, 0.09) !important;
 }
 
@@ -5769,15 +5769,15 @@ aside.sidebar .mobile-logout-btn {
 ========================================================= */
 
 .explore-card {
-  border: 2px solid #F6E7A8 !important;
+  border: 2px solid #F7C6D9 !important;
   border-radius: 18px !important;
-  background: #FFFDF4 !important;
+  background: #FFF5F8 !important;
   box-shadow: 0 4px 14px rgba(90, 70, 30, 0.06) !important;
   overflow: hidden;
 }
 
 .explore-card:hover {
-  border-color: #F1D98A !important;
+  border-color: #F2B5CC !important;
   box-shadow: 0 6px 18px rgba(90, 70, 30, 0.09) !important;
 }
 
@@ -5917,10 +5917,10 @@ aside.sidebar .mobile-logout-btn {
 
   padding: 24px;
 
-  border: 2px solid #F6E7A8;
+  border: 2px solid #F7C6D9;
   border-radius: 18px;
 
-  background: #FFFDF4;
+  background: #FFF5F8;
 
   text-align: center;
 }
@@ -6163,11 +6163,6 @@ aside.sidebar .mobile-logout-btn {
    EXPLORE BUTTONS
 ========================================================= */
 
-.explore-section .pdax-action-btn {
-  background: #F9EFAF;
-  color: #4A4A32;
-  border: none;
-}
 
 .explore-section .pdax-action-btn:hover {
   background: #F4E59A;
@@ -6179,14 +6174,14 @@ aside.sidebar .mobile-logout-btn {
 ========================================================= */
 
 .explore-section .explore-card .pdax-action-btn {
-  background: #FFE58A !important;
+  background: #F8C8DC !important;
   color: #3F4A3F !important;
   border: none !important;
   box-shadow: none !important;
 }
 
 .explore-section .explore-card .pdax-action-btn:hover {
-  background: #FFDC68 !important;
+  background: #F3AFC8 !important;
   color: #3F4A3F !important;
 }
 
@@ -6237,4 +6232,5 @@ aside.sidebar .mobile-logout-btn {
 .explore-placeholder p {
   white-space: nowrap !important;
 }
+
 
