@@ -905,13 +905,130 @@ function loadCryptoDropdown(){
 
 
 
+
+function loadAvailableCryptoForSell(){
+
+  callAppsScript(
+    "getPortfolio",
+    []
+  )
+
+  .then(function(portfolio){
+
+    const dropdown =
+      document.getElementById("cryptoName");
+
+    if(!dropdown) return;
+
+    dropdown.innerHTML =
+      "<option value=''>Select Cryptocurrency</option>";
+
+    console.log(
+      "Crypto portfolio received:",
+      portfolio
+    );
+
+    if(!Array.isArray(portfolio)){
+
+      console.error(
+        "Crypto portfolio is not an array:",
+        portfolio
+      );
+
+      return;
+
+    }
+
+    portfolio.forEach(function(asset){
+
+      const assetType =
+        normalizeAssetTypeClient(
+          asset.assetType
+        );
+
+      const assetName =
+        String(
+          asset.assetName || ""
+        ).trim();
+
+      const quantity =
+        Number(asset.quantity) || 0;
+
+      if(
+        assetType === "Crypto"
+        &&
+        assetName.toUpperCase() !== "USDT"
+        &&
+        assetName.toUpperCase() !== "USDC"
+        &&
+        quantity > 0
+      ){
+
+        const option =
+          document.createElement("option");
+
+        option.value =
+          asset.assetName;
+
+        option.textContent =
+          asset.assetName +
+          " (" +
+          quantity.toLocaleString() +
+          ")";
+
+        dropdown.appendChild(option);
+
+      }
+
+    });
+
+  })
+
+  .catch(function(error){
+
+    console.error(
+      "Loading crypto portfolio failed:",
+      error
+    );
+
+  });
+
+}
+
+function cryptoTransactionChanged(){
+
+  const type =
+    document.getElementById(
+      "cryptoTransactionType"
+    ).value;
+
+  const dropdown =
+    document.getElementById(
+      "cryptoName"
+    );
+
+  if(!dropdown) return;
+
+  if(type === "Sell"){
+
+    loadAvailableCryptoForSell();
+
+  }
+  else{
+
+    loadCryptoDropdown();
+
+  }
+
+}
+
+
 function openCryptoModal(){
 
   document.getElementById("cryptoModal")
-  .style.display = "flex";
+    .style.display = "flex";
 
-
-  loadCryptoDropdown();
+  cryptoTransactionChanged();
 
 }
 
@@ -3578,7 +3695,7 @@ function loadSavingsSummary(){
 
         <div class="asset-card">
 
-          <h2>Digital Cash</h2>
+          <h2>Fiat</h2>
 
           <h3>
             ${formatPeso(data.digital.total)}
@@ -9473,6 +9590,88 @@ function loadLoans(){
 
             totalOriginal += original;
 
+            // Calculate how long the loan has been active
+let loanStartedText = "";
+
+if (loan.date) {
+
+  const startDate = new Date(loan.date);
+  const today = new Date();
+
+  if (!isNaN(startDate.getTime())) {
+
+    const formattedDate =
+      startDate.toLocaleDateString(
+        "en-US",
+        {
+          month: "short",
+          day: "numeric",
+          year: "numeric"
+        }
+      );
+
+    let years =
+      today.getFullYear() -
+      startDate.getFullYear();
+
+    const anniversary =
+      new Date(
+        today.getFullYear(),
+        startDate.getMonth(),
+        startDate.getDate()
+      );
+
+    if (today < anniversary) {
+      years--;
+    }
+
+    let durationText = "";
+
+    if (years > 0) {
+      durationText =
+        years === 1
+          ? "1 year ago"
+          : years + " years ago";
+    }
+    else {
+
+      const months =
+        (today.getFullYear() -
+          startDate.getFullYear()) * 12 +
+        (today.getMonth() -
+          startDate.getMonth());
+
+      if (months > 0) {
+        durationText =
+          months === 1
+            ? "1 month ago"
+            : months + " months ago";
+      }
+      else {
+
+        const days =
+          Math.floor(
+            (today - startDate) /
+            (1000 * 60 * 60 * 24)
+          );
+
+        durationText =
+          days <= 0
+            ? "Started today"
+            : days === 1
+              ? "1 day ago"
+              : days + " days ago";
+      }
+    }
+
+    loanStartedText =
+  '<strong>Start Date:</strong> ' +
+  formattedDate +
+  " · " +
+  durationText;
+  }
+}
+
             totalOutstanding += outstanding;
 
             totalPaid += paid;
@@ -9521,6 +9720,14 @@ function loadLoans(){
       </span>
     </p>
 
+    ${loanStartedText
+  ? `
+    <p class="loan-started" style="font-weight: normal !important; font-family: inherit !important;">
+      ${loanStartedText}
+    </p>
+  `
+  : ""
+}
 
 
     <p>
