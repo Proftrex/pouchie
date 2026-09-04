@@ -187,6 +187,59 @@ let currentPage = "dashboard";
    PAGE SWITCH
 ========================= */
 
+
+/* =========================
+   POUCHI AI
+========================= */
+
+function askPouchie(question){
+
+  if(!question || !question.trim()){
+
+    return Promise.reject(
+      new Error("Please enter a question.")
+    );
+
+  }
+
+  console.log(
+    "ASKING POUCHIE:",
+    question
+  );
+
+  return callAppsScript(
+    "askPouchie",
+    [
+      question.trim()
+    ]
+  )
+
+  .then(function(response){
+
+    console.log(
+      "POUCHIE RESPONSE:",
+      response
+    );
+
+    if(
+      response &&
+      response.success === false
+    ){
+
+      throw new Error(
+        response.message ||
+        "Pouchie was unable to answer."
+      );
+
+    }
+
+    return response;
+
+  });
+
+}
+
+
 function showPage(page, saveHistory = true) {
 
 
@@ -246,6 +299,9 @@ function showPage(page, saveHistory = true) {
 
   const businessIncome =
     document.getElementById("businessIncomePage");
+
+  const pouchi =
+    document.getElementById("pouchiPage");
 
 
   // =========================
@@ -341,6 +397,9 @@ function showPage(page, saveHistory = true) {
   if (businessIncome)
     businessIncome.style.display = "none";
 
+  if (pouchi)
+    pouchi.style.display = "none";
+
 
   // =========================
   // SHOW SELECTED PAGE
@@ -392,6 +451,18 @@ function showPage(page, saveHistory = true) {
 
     if (income)
       income.style.display = "block";
+
+  }
+
+
+  // =========================
+  // POUCHI AI
+  // =========================
+
+  else if (page === "pouchi") {
+
+    if (pouchi)
+      pouchi.style.display = "block";
 
   }
 
@@ -12468,3 +12539,173 @@ window.addEventListener("appinstalled", function() {
   console.log("Pouch was installed.");
 
 });
+
+
+
+/* =========================
+   POUCHI CHAT UI
+========================= */
+
+function sendToPouchi(){
+
+  const input =
+    document.getElementById("pouchiInput");
+
+  const messages =
+    document.getElementById("pouchiMessages");
+
+  if(!input || !messages){
+    return;
+  }
+
+  const question =
+    input.value.trim();
+
+  if(!question){
+    return;
+  }
+
+
+  // Show user's message
+
+  const userMessage =
+    document.createElement("div");
+
+  userMessage.className =
+    "pouchi-message pouchi-message-user";
+
+  userMessage.innerHTML =
+    "<p>" +
+    escapePouchiHTML(question) +
+    "</p>";
+
+  messages.appendChild(userMessage);
+
+
+  // Clear input
+
+  input.value = "";
+
+
+  // Scroll to latest message
+
+  messages.scrollTop =
+    messages.scrollHeight;
+
+
+  // Show thinking message
+
+  const thinkingMessage =
+    document.createElement("div");
+
+  thinkingMessage.className =
+    "pouchi-message pouchi-message-ai";
+
+  thinkingMessage.id =
+    "pouchiThinking";
+
+  thinkingMessage.innerHTML =
+    "<p>Pouchie is thinking...</p>";
+
+  messages.appendChild(thinkingMessage);
+
+  messages.scrollTop =
+    messages.scrollHeight;
+
+
+  // Ask Pouchie
+
+  askPouchie(question)
+
+    .then(function(response){
+
+      const thinking =
+        document.getElementById(
+          "pouchiThinking"
+        );
+
+      if(thinking){
+        thinking.remove();
+      }
+
+
+      const aiMessage =
+        document.createElement("div");
+
+      aiMessage.className =
+        "pouchi-message pouchi-message-ai";
+
+      const answer =
+        response &&
+        response.answer
+          ? response.answer
+          : "I wasn't able to generate a response.";
+
+
+      aiMessage.innerHTML =
+        "<p>" +
+        escapePouchiHTML(answer)
+          .replace(/\n/g, "<br>") +
+        "</p>";
+
+
+      messages.appendChild(aiMessage);
+
+      messages.scrollTop =
+        messages.scrollHeight;
+
+    })
+
+    .catch(function(error){
+
+      console.error(
+        "Pouchie Error:",
+        error
+      );
+
+
+      const thinking =
+        document.getElementById(
+          "pouchiThinking"
+        );
+
+      if(thinking){
+        thinking.remove();
+      }
+
+
+      const errorMessage =
+        document.createElement("div");
+
+      errorMessage.className =
+        "pouchi-message pouchi-message-ai";
+
+      errorMessage.innerHTML =
+        "<p>Sorry, I couldn't answer that right now.</p>";
+
+
+      messages.appendChild(errorMessage);
+
+      messages.scrollTop =
+        messages.scrollHeight;
+
+    });
+
+}
+
+
+/* =========================
+   ESCAPE POUCHI HTML
+========================= */
+
+function escapePouchiHTML(text){
+
+  const div =
+    document.createElement("div");
+
+  div.textContent =
+    text;
+
+  return div.innerHTML;
+
+}

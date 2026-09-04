@@ -213,7 +213,7 @@
       alt=""
     >
 
-    <span>My Pouch</span>
+    <span>Dashboard</span>
 
   </button>
 
@@ -230,7 +230,7 @@
       alt=""
     >
 
-    <span>My Treasures</span>
+    <span>Assets</span>
 
   </button>
 
@@ -247,7 +247,7 @@
       alt=""
     >
 
-    <span>My Open Tabs</span>
+    <span>Debts</span>
 
   </button>
 
@@ -264,7 +264,23 @@
       alt=""
     >
 
-    <span>My Hardwork</span>
+    <span>Income</span>
+
+  </button>
+
+    <!-- AI FINANCIAL COMPANION -->
+  <button
+    type="button"
+    data-page="pouchi"
+    onclick="showPage('pouchi')"
+  >
+
+    <img
+      src="assets/pouchie.png"
+      alt=""
+    >
+
+    <span>Pouchie</span>
 
   </button>
 
@@ -379,7 +395,7 @@
 </button>
 
     <h1>
-      My Treasures
+      My Assets
     </h1>
 
   </div>
@@ -578,14 +594,14 @@
 </button>
 
     <h1>
-      My Open Tabs
+      My Debts
     </h1>
 
   </div>
 
 
   <h2>
-    What's in your open tabs?
+    How's your debts?
   </h2>
 
 
@@ -1000,14 +1016,14 @@
 
 
     <h1>
-      My Hardword
+     My Income
     </h1>
 
   </div>
 
 
   <h2>
-    How's your hardwork so far?
+    How's your income so far?
   </h2>
 
 
@@ -2686,6 +2702,69 @@
 </section>
 
 
+
+<!-- =========================================================
+     POUCHI AI PAGE
+========================================================= -->
+
+<section id="pouchiPage" style="display:none;">
+
+  <div class="pouchi-container">
+
+    <div class="pouchi-welcome">
+
+  <div class="pouchi-welcome-title">
+    <img
+      src="assets/pouchie.png"
+      alt=""
+      class="pouchi-welcome-image"
+    >
+
+    <h2>Hi! I'm Pouchie</h2>
+  </div>
+
+  <p>Your little financial companion.</p>
+
+</div>
+
+    <div class="pouchi-chat">
+
+      <div id="pouchiMessages" class="pouchi-messages">
+
+        <div class="pouchi-message pouchi-message-ai">
+          <p>
+            Hi! I'm Pouchie. Ask me anything about
+            money, saving, investing, or finance.
+          </p>
+        </div>
+
+      </div>
+
+      <div class="pouchi-input-area">
+
+        <input
+          type="text"
+          id="pouchiInput"
+          placeholder="Ask Pouchie something..."
+          autocomplete="off"
+        >
+
+        <button
+          type="button"
+          onclick="sendToPouchi()"
+        >
+          ➤
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</section>
+
+
 </main>
 
 </div>
@@ -3976,17 +4055,17 @@
 
   <button onclick="showPage('assets')">
     💰
-    <span>Treasures</span>
+    <span>Assets</span>
   </button>
 
   <button onclick="showPage('liabilities')">
     🔒
-    <span>Open Tabs</span>
+    <span>Debts</span>
   </button>
 
   <button onclick="showPage('income')">
     📊
-    <span>Hardwork</span>
+    <span>Income</span>
   </button>
 
 </nav>
