@@ -6388,6 +6388,12 @@ body * {
   object-fit: contain;
 }
 
+.signup-hint {
+  color: #888 !important;
+  font-size: 10px !important;
+  font-style: italic !important;
+  font-weight: 400 !important;
+}
 
 /* POUCHIE PAGE HEADER FIX */
 
